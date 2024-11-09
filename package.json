@@ -25,11 +25,16 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
+    "postcss": "^8.4.47",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "prop-types": "^15.8.1",
     "storybook": "^8.4.2",
     "vite": "^5.4.8"
   },
   "dependencies": {
+    "@mantine/core": "^7.13.5",
+    "@mantine/hooks": "^7.13.5",
     "@tanstack/react-router": "^1.79.0",
     "@tanstack/router-devtools": "^1.79.0",
     "react": "^18.3.1",
