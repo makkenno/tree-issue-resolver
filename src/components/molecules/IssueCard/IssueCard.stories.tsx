@@ -13,7 +13,6 @@ type Story = StoryObj<typeof IssueCard>;
 export const Default: Story = {
   args: {
     title: "地球って何？",
-    href: "https://example.com",
   },
 };
 
@@ -22,9 +21,6 @@ export const DisplayTest: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    expect(canvas.getByRole("link", { name: /地球って何？/ })).toHaveAttribute(
-      "href",
-      "https://example.com"
-    );
+    expect(canvas.getByText(/地球って何？/)).toBeInTheDocument();
   },
 };
