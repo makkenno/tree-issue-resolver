@@ -29,7 +29,7 @@ const TOO_LONG_TEXT =
 export const TooLongText: Story = {
   args: {
     title: TOO_LONG_TEXT,
-    isResolved: true,
+    isResolved: false,
   },
 };
 export const DisplayTest: Story = {
