@@ -16,6 +16,8 @@ export const Default: Story = {
     note: "",
     isResolved: false,
     children: [],
+    onSubmit: (value) =>
+      new Promise(() => setTimeout(() => console.log(value), 1000)),
   },
 };
 

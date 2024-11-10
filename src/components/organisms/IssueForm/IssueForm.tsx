@@ -33,13 +33,25 @@ interface IssueFormProps {
   note: string;
   isResolved: boolean;
   children: { title: string }[];
+  onSubmit: (value: IssueSchema) => Promise<void>;
 }
 
-export const IssueForm: FC<IssueFormProps> = (props) => {
+export const IssueForm: FC<IssueFormProps> = ({
+  title,
+  note,
+  isResolved,
+  children,
+  onSubmit,
+}) => {
   const form = useForm({
-    defaultValues: props as IssueSchema,
+    defaultValues: {
+      title,
+      note,
+      isResolved,
+      children,
+    } as IssueSchema,
     onSubmit: async ({ value }) => {
-      console.log({ value });
+      await onSubmit(value);
     },
     validatorAdapter: zodValidator(),
     validators: {
