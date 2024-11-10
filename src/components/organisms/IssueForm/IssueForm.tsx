@@ -80,7 +80,7 @@ export const IssueForm: FC<IssueFormProps> = ({
         <form.Field name="children" mode="array">
           {(field) => {
             return (
-              <Fieldset legend="関連する子課題">
+              <Fieldset legend="関連する子課題" bg="initial">
                 <Stack>
                   {field.state.value.map((_, i) => {
                     return (
