@@ -1,14 +1,19 @@
-import * as React from 'react'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import * as React from "react";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { CreateIssueFormPage } from "@/components/pages/Index/CreateIssueFormPage/CreateIssueFormPage";
+import { Container } from "@mantine/core";
+import { useGetIssueTreeAtom } from "@/hooks/useIssueTreeAtom";
+import { DisplayIssueTreePage } from "@/components/pages/Index/DisplayIssueTreePage/DisplayIssueTreePage";
 
-export const Route = createLazyFileRoute('/')({
+export const Route = createLazyFileRoute("/")({
   component: HomeComponent,
-})
+});
 
 function HomeComponent() {
+  const issueTree = useGetIssueTreeAtom();
   return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
-    </div>
-  )
+    <Container>
+      {issueTree.id === "" ? <CreateIssueFormPage /> : <DisplayIssueTreePage />}
+    </Container>
+  );
 }

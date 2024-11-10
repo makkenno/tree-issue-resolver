@@ -8,7 +8,7 @@ type TreeToNodesAndeEdges = (tree: IssueTree) => {
 
 export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (tree) => {
   const { id, children } = tree;
-  const { nodes } = createTreeNodesWithPosition(tree, { x: 0, y: 0 });
+  const { nodes } = createTreeNodesWithPosition(tree, { x: 40, y: 40 });
 
   return {
     nodes,

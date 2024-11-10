@@ -64,6 +64,7 @@ export const IssueForm: FC<IssueFormProps> = ({
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
+        form.state.isSubmitting = false;
       }}
     >
       <Stack gap="lg">
