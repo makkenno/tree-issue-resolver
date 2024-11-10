@@ -17,6 +17,7 @@ import { Route as rootRoute } from './routes/__root'
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute('/')()
+const IndexNodeIdEditLazyImport = createFileRoute('/index/$nodeId/edit')()
 
 // Create/Update Routes
 
@@ -25,6 +26,14 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const IndexNodeIdEditLazyRoute = IndexNodeIdEditLazyImport.update({
+  id: '/index/$nodeId/edit',
+  path: '/index/$nodeId/edit',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/index.$nodeId.edit.lazy').then((d) => d.Route),
+)
 
 // Populate the FileRoutesByPath interface
 
@@ -37,6 +46,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/index/$nodeId/edit': {
+      id: '/index/$nodeId/edit'
+      path: '/index/$nodeId/edit'
+      fullPath: '/index/$nodeId/edit'
+      preLoaderRoute: typeof IndexNodeIdEditLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -44,32 +60,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/index/$nodeId/edit': typeof IndexNodeIdEditLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/index/$nodeId/edit': typeof IndexNodeIdEditLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
+  '/index/$nodeId/edit': typeof IndexNodeIdEditLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/index/$nodeId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/index/$nodeId/edit'
+  id: '__root__' | '/' | '/index/$nodeId/edit'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  IndexNodeIdEditLazyRoute: typeof IndexNodeIdEditLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  IndexNodeIdEditLazyRoute: IndexNodeIdEditLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -82,11 +103,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/index/$nodeId/edit"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/index/$nodeId/edit": {
+      "filePath": "index.$nodeId.edit.lazy.tsx"
     }
   }
 }
