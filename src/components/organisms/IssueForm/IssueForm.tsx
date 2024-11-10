@@ -14,10 +14,7 @@ const title = z
   .string()
   .min(1, "この項目は必須です。")
   .max(140, "140文字以下で入力してください。");
-const note = z
-  .string()
-  .min(1, "この項目は必須です。")
-  .max(1000, "1000文字以下で入力してください。");
+const note = z.string().max(1000, "1000文字以下で入力してください。");
 
 const issueSchema = z.object({
   title,
