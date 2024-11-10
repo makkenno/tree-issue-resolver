@@ -7,7 +7,7 @@ import "@mantine/core/styles.css";
 import { Provider } from "./provider";
 
 // Set up a Router instance
-const router = createRouter({
+export const router = createRouter({
   routeTree,
   defaultPreload: "intent",
 });
