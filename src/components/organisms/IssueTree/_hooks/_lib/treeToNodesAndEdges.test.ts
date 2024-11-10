@@ -53,13 +53,13 @@ describe("treeToNodesAndEdges", () => {
       },
       {
         id: "2",
-        position: { x: 0, y: 0 },
+        position: { x: 240, y: 0 },
         type: "issueCard",
         data: { id: "2", title: "生物とは何か？", isResolved: false },
       },
       {
         id: "3",
-        position: { x: 0, y: 0 },
+        position: { x: 240, y: 60 },
         type: "issueCard",
         data: { id: "3", title: "宇宙とは何か？", isResolved: true },
       },
@@ -109,19 +109,19 @@ describe("treeToNodesAndEdges", () => {
       },
       {
         id: "2",
-        position: { x: 0, y: 0 },
+        position: { x: 240, y: 0 },
         type: "issueCard",
         data: { id: "2", title: "生物とは何か？", isResolved: false },
       },
       {
         id: "3",
-        position: { x: 0, y: 0 },
+        position: { x: 240, y: 60 },
         type: "issueCard",
         data: { id: "3", title: "宇宙とは何か？", isResolved: true },
       },
       {
         id: "4",
-        position: { x: 0, y: 0 },
+        position: { x: 480, y: 60 },
         type: "issueCard",
         data: { id: "4", title: "銀河とは何か？", isResolved: true },
       },

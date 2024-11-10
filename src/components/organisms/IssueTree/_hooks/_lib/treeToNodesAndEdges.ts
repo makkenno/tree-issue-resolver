@@ -7,27 +7,45 @@ type TreeToNodesAndeEdges = (tree: IssueTree) => {
 };
 
 export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (tree) => {
-  const { id, title, isResolved, children } = tree;
+  const { id, children } = tree;
+  const { nodes } = createTreeNodesWithPosition(tree, { x: 0, y: 0 });
 
   return {
-    nodes: [
-      createNode(id, title, isResolved),
-      ...createChildrenNodesRecursively(children, 1),
-    ],
+    nodes,
     edges: createEdges(id, children),
   };
 };
 
-const createChildrenNodesRecursively = (
-  children: IssueTree[],
-  rank: number
-): NodeType[] => {
-  return children
-    .map(({ id, title, isResolved, children: grandChildren }, i) => [
-      createNode(id, title, isResolved),
-      ...createChildrenNodesRecursively(grandChildren, rank + 1),
-    ])
-    .flat();
+const createTreeNodesWithPosition = (
+  tree: IssueTree,
+  position: { x: number; y: number }
+): { nodes: NodeType[]; totalHeight: number } => {
+  const { id, title, isResolved, children } = tree;
+  const { x, y } = position;
+
+  const currentNode = createNodeWithPosition(
+    { id, title, isResolved },
+    { x, y }
+  );
+
+  let childY = y;
+  const nodes = [currentNode];
+
+  children.forEach((child, i) => {
+    const { nodes: childNodes, totalHeight } = createTreeNodesWithPosition(
+      child,
+      {
+        x: x + 240,
+        y: childY,
+      }
+    );
+    nodes.push(...childNodes);
+    const isLastChild = i === children.length - 1;
+    childY += isLastChild ? totalHeight : totalHeight + 20; // 子ノードの高さとスペースを加算して次の子のy位置を調整
+  });
+
+  const totalHeight = Math.max(40, childY - y); // 子が１つしかない時は固定値
+  return { nodes, totalHeight };
 };
 
 const createEdges = (parentId: string, children: IssueTree[]): EdgeType[] => {
@@ -49,14 +67,18 @@ type NodeType = {
     isResolved: boolean;
   };
 };
-const createNode = (
-  id: string,
-  title: string,
-  isResolved: boolean
+const createNodeWithPosition = (
+  data: {
+    id: string;
+    title: string;
+    isResolved: boolean;
+  },
+  position: { x: number; y: number }
 ): NodeType => {
+  const { id, title, isResolved } = data;
   return {
     id,
-    position: { x: 0, y: 0 },
+    position,
     type: "issueCard",
     data: {
       id,

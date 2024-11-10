@@ -5,29 +5,56 @@ import { IssueTree } from "./IssueTree";
 // IssueTreeのモックデータを作成
 const mockIssueTree: IssueTree = {
   id: "1",
-  title: "地球とは何か",
+  title: "Root Issue",
   isResolved: false,
   children: [
     {
-      id: "2",
-      title: "太陽とは何か",
-      isResolved: true,
+      id: "1-1",
+      title: "Sub Issue 1-1",
+      isResolved: false,
       children: [
         {
-          id: "4",
-          title: "核融合とは何か",
-          isResolved: true,
-          children: [],
-        },
-        {
-          id: "5",
-          title: "太陽系の構造",
+          id: "1-1-1",
+          title: "Sub Issue 1-1-1",
           isResolved: false,
           children: [
             {
-              id: "6",
-              title: "惑星と衛星",
+              id: "1-1-1-1",
+              title: "Sub Issue 1-1-1-1",
               isResolved: false,
+              children: [
+                {
+                  id: "1-1-1-1-1",
+                  title: "Sub Issue 1-1-1-1-1",
+                  isResolved: true,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "1-1-2",
+          title: "Sub Issue 1-1-2",
+          isResolved: false,
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "1-2",
+      title: "Sub Issue 1-2",
+      isResolved: true,
+      children: [
+        {
+          id: "1-2-1",
+          title: "Sub Issue 1-2-1",
+          isResolved: true,
+          children: [
+            {
+              id: "1-2-1-1",
+              title: "Sub Issue 1-2-1-1",
+              isResolved: true,
               children: [],
             },
           ],
@@ -35,21 +62,35 @@ const mockIssueTree: IssueTree = {
       ],
     },
     {
-      id: "3",
-      title: "人間とは何か",
+      id: "1-3",
+      title: "Sub Issue 1-3",
       isResolved: false,
       children: [
         {
-          id: "7",
-          title: "意識とは",
-          isResolved: false,
-          children: [],
-        },
-        {
-          id: "8",
-          title: "生物学的構造",
+          id: "1-3-1",
+          title: "Sub Issue 1-3-1",
           isResolved: true,
-          children: [],
+          children: [
+            {
+              id: "1-3-1-1",
+              title: "Sub Issue 1-3-1-1",
+              isResolved: true,
+              children: [
+                {
+                  id: "1-3-1-1-1",
+                  title: "Sub Issue 1-3-1-1-1",
+                  isResolved: true,
+                  children: [],
+                },
+                {
+                  id: "1-3-1-1-2",
+                  title: "Sub Issue 1-3-1-1-2",
+                  isResolved: true,
+                  children: [],
+                },
+              ],
+            },
+          ],
         },
       ],
     },

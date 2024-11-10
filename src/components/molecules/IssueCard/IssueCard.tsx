@@ -12,7 +12,7 @@ interface IssueCardProps {
   isResolved: boolean;
 }
 
-const MAX_LETTER_LENGTH = 24;
+const MAX_LETTER_LENGTH = 10;
 
 export const IssueCard: FC<IssueCardProps> = ({ title, isResolved }) => {
   return (
@@ -27,7 +27,7 @@ export const IssueCard: FC<IssueCardProps> = ({ title, isResolved }) => {
         maw={`${MAX_LETTER_LENGTH}em`}
         padding="sm"
       >
-        <Flex gap="xs">
+        <Flex gap={4}>
           <Box h="24px">
             {isResolved ? (
               <CheckCircleIcon color="green" />
