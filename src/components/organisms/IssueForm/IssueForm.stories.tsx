@@ -12,9 +12,10 @@ type Story = StoryObj<typeof IssueForm>;
 
 export const Default: Story = {
   args: {
-    label: "ラベル",
-    description: "説明",
-    placeholder: "プレースホルダー",
+    title: "",
+    note: "",
+    isResolved: false,
+    children: [],
   },
 };
 

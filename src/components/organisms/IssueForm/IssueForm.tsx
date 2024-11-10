@@ -8,6 +8,7 @@ import { TitleTextInput } from "./_components/TitleTextInput";
 import { NoteTextarea } from "./_components/NoteTextarea";
 import { IsResolvedCheckbox } from "./_components/IsResolvedCheckbox";
 import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
+import { FC } from "react";
 
 const title = z
   .string()
@@ -27,14 +28,16 @@ const issueSchema = z.object({
 
 export type IssueSchema = z.infer<typeof issueSchema>;
 
-export const IssueForm = () => {
+interface IssueFormProps {
+  title: string;
+  note: string;
+  isResolved: boolean;
+  children: { title: string }[];
+}
+
+export const IssueForm: FC<IssueFormProps> = (props) => {
   const form = useForm({
-    defaultValues: {
-      title: "",
-      note: "",
-      isResolved: false,
-      children: [],
-    } as IssueSchema,
+    defaultValues: props as IssueSchema,
     onSubmit: async ({ value }) => {
       console.log({ value });
     },
