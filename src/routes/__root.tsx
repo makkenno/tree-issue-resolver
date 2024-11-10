@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { Box } from "@/components/atoms/Box/Box";
+import { Container } from "@mantine/core";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -9,7 +11,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <>
-      <div className="p-2 flex gap-2 text-lg">
+      <Container>
         <Link
           to="/"
           activeProps={{
@@ -19,7 +21,7 @@ function RootComponent() {
         >
           Home
         </Link>
-      </div>
+      </Container>
       <hr />
       <Outlet />
       {/* <TanStackRouterDevtools position="bottom-right" /> */}
