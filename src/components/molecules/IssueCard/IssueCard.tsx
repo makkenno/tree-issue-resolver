@@ -12,7 +12,7 @@ interface IssueCardProps {
   isResolved: boolean;
 }
 
-const MAX_LETTER_LENGTH = 10;
+const MAX_LETTER_LENGTH = 40;
 
 export const IssueCard: FC<IssueCardProps> = ({ title, isResolved }) => {
   return (

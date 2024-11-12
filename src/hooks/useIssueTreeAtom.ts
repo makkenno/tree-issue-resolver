@@ -115,8 +115,6 @@ export const useGetIssueNodeWithChildrenAtom = (nodeId: string) => {
 
   const getNodeWithChildren = useCallback(
     (node: IssueTreeAtom): IssueTreeAtom | null => {
-      console.log({ nodeId });
-      console.log({ id: node.id });
       if (node.id === nodeId) {
         // 指定されたIDのノードが見つかったらそのノードとその一階層の子ノードを返す
         return {

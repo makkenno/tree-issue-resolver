@@ -30,18 +30,19 @@ const createTreeNodesWithPosition = (
 
   let childY = y;
   const nodes = [currentNode];
+  const xMargin = Math.min(title.length, 40) * 16 + 160;
 
   children.forEach((child, i) => {
     const { nodes: childNodes, totalHeight } = createTreeNodesWithPosition(
       child,
       {
-        x: x + 240,
+        x: x + xMargin,
         y: childY,
       }
     );
     nodes.push(...childNodes);
     const isLastChild = i === children.length - 1;
-    childY += isLastChild ? totalHeight : totalHeight + 20; // 子ノードの高さとスペースを加算して次の子のy位置を調整
+    childY += isLastChild ? totalHeight : totalHeight + 60; // 子ノードの高さとスペースを加算して次の子のy位置を調整
   });
 
   const totalHeight = Math.max(40, childY - y); // 子が１つしかない時は固定値
