@@ -27,8 +27,8 @@ export const IssueCard: FC<IssueCardProps> = ({ title, isResolved }) => {
         maw={`${MAX_LETTER_LENGTH}em`}
         padding="sm"
       >
-        <Flex gap={4}>
-          <Box h="24px">
+        <Flex gap={4} align="center">
+          <Box>
             {isResolved ? (
               <CheckCircleIcon color="green" />
             ) : (
