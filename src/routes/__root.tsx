@@ -23,7 +23,9 @@ function RootComponent() {
         </Link>
       </Container>
       <hr />
-      <Outlet />
+      <Box mb="xl">
+        <Outlet />
+      </Box>
       {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </>
   );
