@@ -35,7 +35,7 @@ function generateMarkdown(node: Node, depth: number = 1): string {
   const headerPrefix = "#".repeat(depth);
   let markdown =
     node.note.length !== 0
-      ? `${headerPrefix} ${node.title}\n\n${node.note.replaceAll("\n", "\n\n")}\n\n`
+      ? `${headerPrefix} ${node.title}\n\n${node.note}\n\n`
       : `${headerPrefix} ${node.title}\n\n`;
 
   for (const child of node.children) {
