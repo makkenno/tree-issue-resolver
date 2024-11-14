@@ -77,7 +77,6 @@ export const useImportIssueTreeAtom = () => {
     const { success, data: issueTree } = issueTreeSchema.safeParse(
       JSON.parse(json)
     );
-    console.log({ issueTree });
     if (!success || !issueTree) {
       throw new Error("正しいデータ形式ではありません。");
     }
