@@ -6,6 +6,7 @@ import {
   IssueCardNodeProps,
 } from "../_components/IssueCardNode";
 import { treeToNodesAndeEdges } from "./_lib/treeToNodesAndEdges";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type IssueTreeHookType = (tree: IssueTree) => {
   nodes: ReactFlowProps["nodes"];
@@ -16,7 +17,8 @@ type IssueTreeHookType = (tree: IssueTree) => {
 };
 
 export const useIssueTree: IssueTreeHookType = (tree) => {
-  const { nodes, edges } = treeToNodesAndeEdges(tree);
+  const matches = !!useMediaQuery();
+  const { nodes, edges } = treeToNodesAndeEdges(tree, { matches });
   const nodeTypes = useMemo(() => ({ issueCard: IssueCardNode }), []);
   return {
     nodes,

@@ -1,14 +1,24 @@
 import { ReactFlowProps } from "@xyflow/react";
 import { IssueTree } from "../../IssueTree";
 
-type TreeToNodesAndeEdges = (tree: IssueTree) => {
+type TreeToNodesAndeEdges = (
+  tree: IssueTree,
+  options: { matches: boolean }
+) => {
   nodes: Required<ReactFlowProps["nodes"]>;
   edges: Required<ReactFlowProps["edges"]>;
 };
 
-export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (tree) => {
+export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (
+  tree,
+  { matches }
+) => {
   const { id, children } = tree;
-  const { nodes } = createTreeNodesWithPosition(tree, { x: 40, y: 40 });
+  const { nodes } = createTreeNodesWithPosition(
+    tree,
+    { x: 40, y: 40 },
+    { matches }
+  );
 
   return {
     nodes,
@@ -18,10 +28,12 @@ export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (tree) => {
 
 const createTreeNodesWithPosition = (
   tree: IssueTree,
-  position: { x: number; y: number }
+  position: { x: number; y: number },
+  options: { matches: boolean }
 ): { nodes: NodeType[]; totalHeight: number } => {
   const { id, title, isResolved, children } = tree;
   const { x, y } = position;
+  const { matches } = options;
 
   const currentNode = createNodeWithPosition(
     { id, title, isResolved },
@@ -30,7 +42,7 @@ const createTreeNodesWithPosition = (
 
   let childY = y;
   const nodes = [currentNode];
-  const xMargin = Math.min(title.length, 40) * 16 + 160;
+  const xMargin = Math.min(title.length, 40) * (matches ? 20 : 16) + 160;
 
   children.forEach((child, i) => {
     const { nodes: childNodes, totalHeight } = createTreeNodesWithPosition(
@@ -38,7 +50,8 @@ const createTreeNodesWithPosition = (
       {
         x: x + xMargin,
         y: childY,
-      }
+      },
+      { matches }
     );
     nodes.push(...childNodes);
     const isLastChild = i === children.length - 1;
