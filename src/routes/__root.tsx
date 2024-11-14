@@ -32,6 +32,15 @@ function RootComponent() {
           >
             Output
           </Link>
+          <Link
+            to="/import"
+            activeProps={{
+              className: "font-bold",
+            }}
+            activeOptions={{ exact: true }}
+          >
+            Import
+          </Link>
         </Flex>
       </Container>
       <hr />

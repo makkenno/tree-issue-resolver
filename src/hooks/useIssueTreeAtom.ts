@@ -1,14 +1,24 @@
 import { useAtom } from "jotai";
 import { RESET, atomWithStorage } from "jotai/utils";
 import { useCallback } from "react";
+import { object, z } from "zod";
 
-type IssueTreeAtom = {
-  id: string;
-  title: string;
-  note: string;
-  isResolved: boolean;
-  children: IssueTreeAtom[];
+const baseIssueNodeSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  note: z.string(),
+  isResolved: z.boolean(),
+});
+
+type IssueNodeType = z.infer<typeof baseIssueNodeSchema> & {
+  children: IssueNodeType[];
 };
+
+const issueTreeSchema: z.ZodType<IssueNodeType> = baseIssueNodeSchema.extend({
+  children: z.lazy(() => issueTreeSchema.array()),
+});
+
+type IssueTreeAtom = z.infer<typeof issueTreeSchema>;
 
 const issueTreeAtom = atomWithStorage<IssueTreeAtom>("issueTree", {
   id: "",
@@ -59,6 +69,21 @@ export const useClearIssueTreeAtom = () => {
     setIssueTree(RESET);
   }, []);
   return clearIssueTree;
+};
+
+export const useImportIssueTreeAtom = () => {
+  const [_, setIssueTree] = useAtom(issueTreeAtom);
+  const importIssueTree = useCallback((json: string) => {
+    const { success, data: issueTree } = issueTreeSchema.safeParse(
+      JSON.parse(json)
+    );
+    console.log({ issueTree });
+    if (!success || !issueTree) {
+      throw new Error("正しいデータ形式ではありません。");
+    }
+    setIssueTree(issueTree);
+  }, []);
+  return importIssueTree;
 };
 
 // 特定のノードを編集するフック
