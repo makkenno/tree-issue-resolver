@@ -28,13 +28,13 @@ export const IssueCard: FC<IssueCardProps> = ({ title, isResolved }) => {
         padding="sm"
       >
         <Flex gap={4} align="center">
-          <Box>
+          <Flex align="center">
             {isResolved ? (
               <CheckCircleIcon color="green" />
             ) : (
               <QuestionMarkIcon color="red" />
             )}
-          </Box>
+          </Flex>
           <Text lineClamp={1}>{title}</Text>
         </Flex>
       </Card>
