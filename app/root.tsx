@@ -7,10 +7,11 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import { Container, Flex, Box, ColorSchemeScript } from "@mantine/core";
+import { Container, Flex, Box, ColorSchemeScript, Center } from "@mantine/core";
 import { Provider } from "./provider";
 import "@mantine/core/styles.css";
 import "./global.css";
+import { Loader } from "./components/atoms/Loader/Loader";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -63,5 +64,9 @@ export default function App() {
 }
 
 export function HydrateFallback() {
-  return <p>Loading...</p>;
+  return (
+    <Center h="100vh">
+      <Loader />
+    </Center>
+  );
 }
