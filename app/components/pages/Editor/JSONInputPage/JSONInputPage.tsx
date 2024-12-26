@@ -9,7 +9,7 @@ import { FC, useState } from "react";
 export const JsonImportPage: FC = () => {
   const [jsonInput, setJsonInput] = useState("");
   const importIssue = useImportIssueTreeAtom();
-  const navigate = useNavigate({ from: "/import" });
+  const navigate = useNavigate();
   return (
     <>
       <Title order={4} my="md">
@@ -20,7 +20,7 @@ export const JsonImportPage: FC = () => {
           e.preventDefault();
           e.stopPropagation();
           importIssue(jsonInput);
-          navigate({ to: "/" });
+          navigate("/");
         }}
       >
         <Stack>

@@ -1,5 +1,5 @@
 import { IssueCard } from "../../../molecules/IssueCard/IssueCard";
-import { Link } from "@tanstack/react-router";
+import { Link } from "~/components/atoms/Link/Link";
 import { Handle, Position } from "@xyflow/react";
 import { FC } from "react";
 
@@ -11,7 +11,7 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
   return (
     <>
       <Handle type="target" position={Position.Left} />
-      <Link from="/" to="/index/$nodeId/edit" params={{ nodeId: data.id }}>
+      <Link to={`/${data.id}/edit`}>
         <IssueCard title={data.title} isResolved={data.isResolved} />
       </Link>
       <Handle type="source" position={Position.Right} />

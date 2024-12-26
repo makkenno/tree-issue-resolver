@@ -14,7 +14,7 @@ interface EditIssueFormPageProps {
 export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({ nodeId }) => {
   const editIssueNode = useEditIssueNodeAtom();
   const issueTree = useGetIssueNodeWithChildrenAtom(nodeId);
-  const navigate = useNavigate({ from: "/index/$nodeId/edit" });
+  const navigate = useNavigate();
 
   return (
     <>
@@ -29,7 +29,7 @@ export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({ nodeId }) => {
         onSubmit={(value) =>
           new Promise(() => {
             editIssueNode({ id: nodeId, ...value });
-            navigate({ to: "/" });
+            navigate("/");
           })
         }
       />
