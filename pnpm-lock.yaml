@@ -57,9 +57,15 @@ importers:
       '@remix-run/dev':
         specifier: ^2.15.2
         version: 2.15.2(@remix-run/react@2.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3))(@types/node@22.9.0)(sugarss@4.0.1(postcss@8.4.47))(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(sugarss@4.0.1(postcss@8.4.47)))
+      '@remix-run/testing':
+        specifier: ^2.15.2
+        version: 2.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
       '@storybook/addon-essentials':
         specifier: ^8.4.2
         version: 8.4.2(@types/react@18.3.12)(storybook@8.4.2(prettier@3.3.3))
+      '@storybook/addon-interactions':
+        specifier: ^8.4.7
+        version: 8.4.7(storybook@8.4.2(prettier@3.3.3))
       '@storybook/addon-onboarding':
         specifier: ^8.4.2
         version: 8.4.2(react@18.3.1)(storybook@8.4.2(prettier@3.3.3))
@@ -906,6 +912,16 @@ packages:
       typescript:
         optional: true
 
+  '@remix-run/testing@2.15.2':
+    resolution: {integrity: sha512-f3HCTQyguMogKLSET6VYPcoCveZ6BH+0yWGimIPrXb4gfnw9AyNg/bsdnHb7/u6Zw/LmB0QfOUWAtJCwREcfcQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0
+      typescript: ^5.1.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   '@remix-run/web-blob@3.1.0':
     resolution: {integrity: sha512-owGzFLbqPH9PlKb8KvpNJ0NO74HWE2euAn61eEiyCXX/oteoVzTVSN8mpLgDjaxBf2btj5/nUllSUgpyd6IH6g==}
 
@@ -1051,6 +1067,11 @@ packages:
     peerDependencies:
       storybook: ^8.4.2
 
+  '@storybook/addon-interactions@8.4.7':
+    resolution: {integrity: sha512-fnufT3ym8ht3HHUIRVXAH47iOJW/QOb0VSM+j269gDuvyDcY03D1civCu1v+eZLGaXPKJ8vtjr0L8zKQ/4P0JQ==}
+    peerDependencies:
+      storybook: ^8.4.7
+
   '@storybook/addon-measure@8.4.2':
     resolution: {integrity: sha512-z+j6xQwcUBSpgzl1XDU+xU4YYgLraLMljECW7NvRNyJ/PYixvol8R3wtzWbr+CBpxmvbXjEJCPlF+EjF9/mBWQ==}
     peerDependencies:
@@ -1150,6 +1171,11 @@ packages:
     peerDependencies:
       storybook: ^8.4.2
 
+  '@storybook/instrumenter@8.4.7':
+    resolution: {integrity: sha512-k6NSD3jaRCCHAFtqXZ7tw8jAzD/yTEWXGya+REgZqq5RCkmJ+9S4Ytp/6OhQMPtPFX23gAuJJzTQVLcCr+gjRg==}
+    peerDependencies:
+      storybook: ^8.4.7
+
   '@storybook/manager-api@8.4.2':
     resolution: {integrity: sha512-rhPc4cgQDKDH8NUyRh/ZaJW7QIhR/PO5MNX4xc+vz71sM2nO7ONA/FrgLtCuu4SULdwilEPvGefYvLK0dE+Caw==}
     peerDependencies:
@@ -1195,6 +1221,11 @@ packages:
     resolution: {integrity: sha512-MipTdboStv0hsqF2Sw8TZgP0YnxCcDYwxkTOd4hmRzev/7Brtvpi4pqjqh8k98ZCvhrCPAPVIoX5drk+oi3YUA==}
     peerDependencies:
       storybook: ^8.4.2
+
+  '@storybook/test@8.4.7':
+    resolution: {integrity: sha512-AhvJsu5zl3uG40itSQVuSy5WByp3UVhS6xAnme4FWRwgSxhvZjATJ3AZkkHWOYjnnk+P2/sbz/XuPli1FVCWoQ==}
+    peerDependencies:
+      storybook: ^8.4.7
 
   '@storybook/theming@8.4.2':
     resolution: {integrity: sha512-9j4fnu5LcV+qSs1rdwf61Bt14lms0T1LOZkHxGNcS1c1oH+cPS+sxECh2lxtni+mvOAHUlBs9pKhVZzRPdWpvg==}
@@ -4751,6 +4782,18 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.3
 
+  '@remix-run/testing@2.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)':
+    dependencies:
+      '@remix-run/node': 2.15.2(typescript@5.6.3)
+      '@remix-run/react': 2.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
+      '@remix-run/router': 1.21.0
+      react: 18.3.1
+      react-router-dom: 6.28.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    optionalDependencies:
+      typescript: 5.6.3
+    transitivePeerDependencies:
+      - react-dom
+
   '@remix-run/web-blob@3.1.0':
     dependencies:
       '@remix-run/web-stream': 1.1.0
@@ -4900,6 +4943,15 @@ snapshots:
       '@storybook/global': 5.0.0
       storybook: 8.4.2(prettier@3.3.3)
 
+  '@storybook/addon-interactions@8.4.7(storybook@8.4.2(prettier@3.3.3))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@storybook/instrumenter': 8.4.7(storybook@8.4.2(prettier@3.3.3))
+      '@storybook/test': 8.4.7(storybook@8.4.2(prettier@3.3.3))
+      polished: 4.3.1
+      storybook: 8.4.2(prettier@3.3.3)
+      ts-dedent: 2.2.0
+
   '@storybook/addon-measure@8.4.2(storybook@8.4.2(prettier@3.3.3))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -5020,6 +5072,12 @@ snapshots:
       '@vitest/utils': 2.1.4
       storybook: 8.4.2(prettier@3.3.3)
 
+  '@storybook/instrumenter@8.4.7(storybook@8.4.2(prettier@3.3.3))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@vitest/utils': 2.1.4
+      storybook: 8.4.2(prettier@3.3.3)
+
   '@storybook/manager-api@8.4.2(storybook@8.4.2(prettier@3.3.3))':
     dependencies:
       storybook: 8.4.2(prettier@3.3.3)
@@ -5076,6 +5134,18 @@ snapshots:
       '@storybook/csf': 0.1.11
       '@storybook/global': 5.0.0
       '@storybook/instrumenter': 8.4.2(storybook@8.4.2(prettier@3.3.3))
+      '@testing-library/dom': 10.4.0
+      '@testing-library/jest-dom': 6.5.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/expect': 2.0.5
+      '@vitest/spy': 2.0.5
+      storybook: 8.4.2(prettier@3.3.3)
+
+  '@storybook/test@8.4.7(storybook@8.4.2(prettier@3.3.3))':
+    dependencies:
+      '@storybook/csf': 0.1.11
+      '@storybook/global': 5.0.0
+      '@storybook/instrumenter': 8.4.7(storybook@8.4.2(prettier@3.3.3))
       '@testing-library/dom': 10.4.0
       '@testing-library/jest-dom': 6.5.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)

@@ -1,7 +1,7 @@
-import React from "react";
+import React, { FC, ReactNode } from "react";
 
 import type { Preview } from "@storybook/react";
-import { Provider } from "../src-old/provider";
+import { Provider } from "../app/provider";
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { addons } from "@storybook/preview-api";
 import { DARK_MODE_EVENT_NAME } from "storybook-dark-mode";
 import { useMantineColorScheme } from "@mantine/core";
+import { createRemixStub } from "@remix-run/testing";
 
 const channel = addons.getChannel();
 
@@ -26,9 +27,19 @@ function ColorSchemeWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const Router = ({ children }: { children: ReactNode }): JSX.Element => {
+  return createRemixStub([
+    {
+      path: "/",
+      Component: () => children,
+    },
+  ])({ initialEntries: ["/"] });
+};
+
 const preview: Preview = {
   decorators: [
     (renderStory) => <ColorSchemeWrapper>{renderStory()}</ColorSchemeWrapper>,
+    (renderStory) => <Router>{renderStory()}</Router>,
     (Story, { parameters }) => {
       const { pageLayout } = parameters;
       switch (pageLayout) {
