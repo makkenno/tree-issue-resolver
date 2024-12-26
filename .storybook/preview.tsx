@@ -1,7 +1,7 @@
 import React from "react";
 
 import type { Preview } from "@storybook/react";
-import { Provider } from "../src/provider";
+import { Provider } from "../src-old/provider";
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
