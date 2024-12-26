@@ -10,7 +10,7 @@ const baseIssueNodeSchema = z.object({
   isResolved: z.boolean(),
 });
 
-type IssueNodeType = z.infer<typeof baseIssueNodeSchema> & {
+export type IssueNodeType = z.infer<typeof baseIssueNodeSchema> & {
   children: IssueNodeType[];
 };
 

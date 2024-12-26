@@ -7,8 +7,10 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import { Container, Flex, Box } from "@mantine/core";
+import { Container, Flex, Box, ColorSchemeScript } from "@mantine/core";
 import { Provider } from "./provider";
+import "@mantine/core/styles.css";
+import "./global.css";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -31,9 +33,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <ColorSchemeScript />
       </head>
       <body>
-        {children}
+        <Provider>{children}</Provider>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -43,7 +46,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <Provider>
+    <>
       <Container>
         <Flex gap="xs">
           <Link to="/">Home</Link>
@@ -55,7 +58,7 @@ export default function App() {
       <Box mb="xl">
         <Outlet />
       </Box>
-    </Provider>
+    </>
   );
 }
 

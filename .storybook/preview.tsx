@@ -38,8 +38,8 @@ const Router = ({ children }: { children: ReactNode }): JSX.Element => {
 
 const preview: Preview = {
   decorators: [
-    (renderStory) => <ColorSchemeWrapper>{renderStory()}</ColorSchemeWrapper>,
     (renderStory) => <Router>{renderStory()}</Router>,
+    (renderStory) => <ColorSchemeWrapper>{renderStory()}</ColorSchemeWrapper>,
     (Story, { parameters }) => {
       const { pageLayout } = parameters;
       switch (pageLayout) {

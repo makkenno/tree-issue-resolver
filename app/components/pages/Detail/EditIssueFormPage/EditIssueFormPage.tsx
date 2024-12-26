@@ -1,19 +1,25 @@
-import { Title } from "../../../atoms/Title/Title";
-import { IssueForm } from "../../../organisms/IssueForm/IssueForm";
-import {
-  useEditIssueNodeAtom,
-  useGetIssueNodeWithChildrenAtom,
-} from "../../../../hooks/useIssueTreeAtom";
-import { useNavigate } from "../../../../hooks/useNavigate";
+import { Title } from "~/components/atoms/Title/Title";
+import { IssueForm } from "~/components/organisms/IssueForm/IssueForm";
+import { IssueNodeType, useEditIssueNodeAtom } from "~/hooks/useIssueTreeAtom";
+import { useNavigate } from "~/hooks/useNavigate";
 import { FC } from "react";
 
 interface EditIssueFormPageProps {
   nodeId: string;
+  title: string;
+  note: string;
+  isResolved: boolean;
+  children: IssueNodeType[];
 }
 
-export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({ nodeId }) => {
+export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({
+  nodeId,
+  title,
+  note,
+  isResolved,
+  children,
+}) => {
   const editIssueNode = useEditIssueNodeAtom();
-  const issueTree = useGetIssueNodeWithChildrenAtom(nodeId);
   const navigate = useNavigate();
 
   return (
@@ -22,10 +28,10 @@ export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({ nodeId }) => {
         課題の編集
       </Title>
       <IssueForm
-        title={issueTree.title}
-        note={issueTree.note}
-        isResolved={issueTree.isResolved}
-        children={issueTree.children}
+        title={title}
+        note={note}
+        isResolved={isResolved}
+        children={children}
         onSubmit={(value) =>
           new Promise(() => {
             editIssueNode({ id: nodeId, ...value });
