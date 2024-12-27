@@ -1,4 +1,4 @@
-import { IssueCard } from "../../../molecules/IssueCard/IssueCard";
+import { IssueCard } from "./IssueCard";
 import { Link } from "~/components/atoms/Link/Link";
 import { Handle, Position } from "@xyflow/react";
 import { FC } from "react";

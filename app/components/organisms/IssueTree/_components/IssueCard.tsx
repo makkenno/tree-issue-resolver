@@ -1,11 +1,10 @@
-import { Box } from "../../atoms/Box/Box";
-import { Card } from "../../atoms/Card/Card";
-import { Flex } from "../../atoms/Flex/Flex";
-import { CheckCircleIcon } from "../../atoms/Icon/CheckCircle/CheckCircle";
-import { QuestionMarkIcon } from "../../atoms/Icon/QuestionMark/QuestionMark";
-import { Text } from "../../atoms/Text/Text";
-import { Tooltip } from "../../atoms/Tooltip/Tooltip";
 import { FC } from "react";
+import { Card } from "~/components/atoms/Card/Card";
+import { Flex } from "~/components/atoms/Flex/Flex";
+import { CheckCircleIcon } from "~/components/atoms/Icon/CheckCircle/CheckCircle";
+import { QuestionMarkIcon } from "~/components/atoms/Icon/QuestionMark/QuestionMark";
+import { Text } from "~/components/atoms/Text/Text";
+import { Tooltip } from "~/components/atoms/Tooltip/Tooltip";
 
 interface IssueCardProps {
   title: string;
