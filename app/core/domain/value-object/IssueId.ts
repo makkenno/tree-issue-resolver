@@ -7,7 +7,7 @@ export class IssueId {
     }
   }
 
-  static toString(rawId: string) {
+  static fromString(rawId: string) {
     return new IssueId(rawId);
   }
 
