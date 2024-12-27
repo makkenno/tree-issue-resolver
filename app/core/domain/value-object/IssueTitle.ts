@@ -6,4 +6,8 @@ export class IssueTitle {
       throw new Error(`Invalid IssueTitle: ${value}`);
     }
   }
+
+  public isEqual(issueTitle: IssueTitle) {
+    return this.value === issueTitle.value;
+  }
 }
