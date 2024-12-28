@@ -50,6 +50,7 @@
     "@tanstack/react-form": "^0.34.4",
     "@tanstack/zod-form-adapter": "^0.34.4",
     "@xyflow/react": "^12.3.4",
+    "dexie": "^4.0.10",
     "isbot": "^4",
     "jotai": "^2.10.1",
     "react": "^18.3.1",
