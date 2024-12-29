@@ -1,5 +1,4 @@
 import {
-  Link,
   Links,
   Meta,
   Outlet,
@@ -20,6 +19,9 @@ import { ActionIcon } from "./components/atoms/ActionIcon/ActionIcon";
 import { Box } from "./components/atoms/Box/Box";
 import { LoadingOverlay } from "./components/molecules/LoadingOverlay/LoadingOverlay";
 import { SidebarContentContainer } from "./components/organisms/SidebarContent/SidebarContentContainer";
+import { EditIcon } from "./components/atoms/Icon/Edit/Edit";
+import { Link } from "./components/atoms/Link/Link";
+import { CloseIcon } from "./components/atoms/Icon/Close/Close";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -73,7 +75,25 @@ export default function App() {
       <Box mb="xl">
         <Outlet />
       </Box>
-      <Drawer opened={isOpen} onClose={() => setIsOpen(false)} title="Menu">
+      <Drawer
+        opened={isOpen}
+        onClose={() => setIsOpen(false)}
+        withCloseButton={false}
+      >
+        <Flex justify="space-between" pb="xs">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => setIsOpen(false)}
+          >
+            <CloseIcon />
+          </ActionIcon>
+          <Link to="/" onClick={() => setIsOpen(false)}>
+            <ActionIcon variant="subtle" color="gray">
+              <EditIcon />
+            </ActionIcon>
+          </Link>
+        </Flex>
         <Suspense fallback={<LoadingOverlay />}>
           <SidebarContentContainer
             onDeleteMenu={() => {}}
