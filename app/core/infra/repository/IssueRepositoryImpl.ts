@@ -22,7 +22,7 @@ export class DexieIssueRepository implements IssueRepository {
   }
 
   public async findIssueSubtree(issueId: IssueId): Promise<Issue | undefined> {
-    const allRecords = await db.issues.orderBy("createdAt").reverse().toArray();
+    const allRecords = await db.issues.orderBy("createdAt").toArray();
     const rootRecord = allRecords.find((r) => r.id === issueId.value);
     if (rootRecord === undefined) return undefined;
 
