@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { CreateRootUseCase } from "~/core/usecase/createRoot";
 import { GetIssuesUseCase } from "~/core/usecase/getIssues";
+import { RemoveIssueUseCase } from "~/core/usecase/removeIssue";
 
 const issueTitlesSchema = z
   .object({
@@ -49,6 +50,13 @@ const createRootIssueAtom = atom(
   }
 );
 
+const removeIssueAtom = atom(null, async (_get, set, args: { id: string }) => {
+  await new RemoveIssueUseCase(new DexieIssueRepository()).execute({
+    id: args.id,
+  });
+  set(refetchIssueTitlesAtom, (prev) => prev + 1);
+});
+
 export const useIssueTitlesAtom = () => {
   const [issueTitles] = useAtom(issueTitlesAtom);
   return issueTitles;
@@ -57,4 +65,9 @@ export const useIssueTitlesAtom = () => {
 export const useCreateRootIssueAtom = () => {
   const [_, createRootIssue] = useAtom(createRootIssueAtom);
   return createRootIssue;
+};
+
+export const useRemoveIssueAtom = () => {
+  const [_, removeIssue] = useAtom(removeIssueAtom);
+  return removeIssue;
 };

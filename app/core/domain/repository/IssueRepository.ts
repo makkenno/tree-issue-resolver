@@ -6,4 +6,5 @@ export interface IssueRepository {
   findIssueSubtree(issueId: IssueId): Promise<Issue | undefined>;
   saveRoot(issue: Issue): Promise<void>;
   updateIssue(issue: Issue): Promise<void>;
+  removeIssue(issueId: IssueId): Promise<void>;
 }

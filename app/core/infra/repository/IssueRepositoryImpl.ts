@@ -93,6 +93,17 @@ export class DexieIssueRepository implements IssueRepository {
     ]);
   }
 
+  public async removeIssue(issueId: IssueId): Promise<void> {
+    const allRecords = await db.issues.toArray();
+    const rootRecord = allRecords.find((r) => r.id === issueId.value);
+    if (rootRecord === undefined) {
+      throw new Error("Issue not found");
+    }
+    const subtree = this.buildSubtree(rootRecord, allRecords);
+    const targetIssues = this.createRecords(subtree).map((r) => r.id);
+    await db.issues.bulkDelete(targetIssues);
+  }
+
   private createRecords(issue: Issue, parentIssueId?: IssueId): IssueRecord[] {
     const record: IssueRecord = {
       id: issue.id.value,

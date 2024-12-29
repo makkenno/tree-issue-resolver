@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import { ColorSchemeScript, Center } from "@mantine/core";
@@ -22,6 +23,7 @@ import { SidebarContentContainer } from "./components/organisms/SidebarContent/S
 import { EditIcon } from "./components/atoms/Icon/Edit/Edit";
 import { Link } from "./components/atoms/Link/Link";
 import { CloseIcon } from "./components/atoms/Icon/Close/Close";
+import { useRemoveIssueAtom } from "./hooks/useIssuesAtom";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -57,6 +59,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
+  const removeIssue = useRemoveIssueAtom();
+  const navigate = useNavigate();
   return (
     <>
       <Flex gap="xs" m="xs" align="center">
@@ -96,7 +100,11 @@ export default function App() {
         </Flex>
         <Suspense fallback={<LoadingOverlay />}>
           <SidebarContentContainer
-            onDeleteMenu={() => {}}
+            onDeleteMenu={async (id) => {
+              await removeIssue({ id });
+              setIsOpen(false);
+              navigate("/");
+            }}
             onClickNav={() => setIsOpen(false)}
           />
         </Suspense>
