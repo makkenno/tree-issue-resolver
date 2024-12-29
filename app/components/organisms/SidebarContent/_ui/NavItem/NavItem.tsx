@@ -9,10 +9,16 @@ import { Menu } from "~/components/molecules/Menu/Menu";
 interface MenuItemProps {
   to: string;
   label: string;
+  onClick: () => void;
   onDelete: () => void;
 }
 
-export const NavItem: FC<MenuItemProps> = ({ to, label, onDelete }) => {
+export const NavItem: FC<MenuItemProps> = ({
+  to,
+  label,
+  onClick,
+  onDelete,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <NavLink
@@ -26,6 +32,7 @@ export const NavItem: FC<MenuItemProps> = ({ to, label, onDelete }) => {
                 color="gray"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   setIsOpen((current) => !current);
                 }}
               >
@@ -33,7 +40,14 @@ export const NavItem: FC<MenuItemProps> = ({ to, label, onDelete }) => {
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item color="red" onClick={onDelete}>
+              <Menu.Item
+                color="red"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
                 削除
               </Menu.Item>
             </Menu.Dropdown>
@@ -42,6 +56,7 @@ export const NavItem: FC<MenuItemProps> = ({ to, label, onDelete }) => {
       }
       component={Link}
       to={to}
+      onClick={onClick}
     />
   );
 };

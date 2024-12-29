@@ -8,11 +8,13 @@ interface SidebarContentProps {
     title: string;
   }[];
   onDeleteMenu: (id: string) => void;
+  onClickNav: () => void;
 }
 
 export const SidebarContent: FC<SidebarContentProps> = ({
   menus,
   onDeleteMenu,
+  onClickNav,
 }) => {
   return (
     <Box component="nav">
@@ -21,6 +23,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
           to={`/${menu.id}`}
           label={menu.title}
           onDelete={() => onDeleteMenu(menu.id)}
+          onClick={onClickNav}
         />
       ))}
     </Box>

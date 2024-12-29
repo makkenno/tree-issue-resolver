@@ -16,6 +16,7 @@ export const Default: Story = {
     to: "/some/path",
     label: "My Nav Label",
     onDelete: () => console.log("Delete called!"),
+    onClick: () => console.log("Change called!"),
   },
 };
 

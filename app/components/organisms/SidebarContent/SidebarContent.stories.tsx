@@ -17,6 +17,7 @@ export const Default: Story = {
       { id: "menu-2", title: "Menu 2" },
     ],
     onDeleteMenu: () => console.log("Delete called!"),
+    onClickNav: () => console.log("Change called!"),
   },
 };
 
