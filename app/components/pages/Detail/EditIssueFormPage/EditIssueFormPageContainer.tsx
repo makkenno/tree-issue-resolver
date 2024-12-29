@@ -11,7 +11,7 @@ export const EditIssueFormPageContainer: FC = () => {
     <EditIssueFormPage
       nodeId={issueNode.id}
       title={issueNode.title}
-      note={issueNode.title}
+      note={issueNode.note}
       isResolved={issueNode.isResolved}
       children={issueNode.children}
     />

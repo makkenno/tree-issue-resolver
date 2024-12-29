@@ -1,3 +1,4 @@
+import { record } from "zod";
 import { Issue } from "~/core/domain/domain-entity/Issue";
 import { IssueRepository } from "~/core/domain/repository/IssueRepository";
 import { IssueId } from "~/core/domain/value-object/IssueId";
@@ -70,26 +71,26 @@ export class DexieIssueRepository implements IssueRepository {
         }))
       );
     }
-    if (!!update && update.length > 0) {
-      await db.issues.bulkPut([
-        {
-          id: issue.id.value,
-          title: issue.title.value,
-          note: issue.note.value,
-          isResolved: issue.isResolved,
-          parentIssueId: existingRecord.parentIssueId,
-          createdAt: issue.createdAt,
-        },
-        ...update.map((r) => ({
-          id: r.id.value,
-          title: r.title.value,
-          note: r.note.value,
-          isResolved: r.isResolved,
-          parentIssueId: issue.id.value,
-          createdAt: r.createdAt,
-        })),
-      ]);
-    }
+    await db.issues.bulkPut([
+      {
+        id: issue.id.value,
+        title: issue.title.value,
+        note: issue.note.value,
+        isResolved: issue.isResolved,
+        parentIssueId: existingRecord.parentIssueId,
+        createdAt: issue.createdAt,
+      },
+      ...(update
+        ? update.map((r) => ({
+            id: r.id.value,
+            title: r.title.value,
+            note: r.note.value,
+            isResolved: r.isResolved,
+            parentIssueId: issue.id.value,
+            createdAt: r.createdAt,
+          }))
+        : []),
+    ]);
   }
 
   private createRecords(issue: Issue, parentIssueId?: IssueId): IssueRecord[] {
