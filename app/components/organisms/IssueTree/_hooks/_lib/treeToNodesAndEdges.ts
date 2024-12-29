@@ -42,7 +42,18 @@ const createTreeNodesWithPosition = (
 
   let childY = y;
   const nodes = [currentNode];
-  const xMargin = Math.min(title.length, 40) * (matches ? 20 : 16) + 160;
+
+  // 半角文字数を計算
+  const halfWidthCount = title.replace(
+    /[\u4e00-\u9fa5\u3040-\u30ff\uFF00-\uFFEF]/g,
+    ""
+  ).length;
+  // 全角文字数を計算
+  const fullWidthCount = title.length - halfWidthCount;
+  // 全角文字は半角文字の約2倍の幅と仮定
+  const width = halfWidthCount * 0.5 + fullWidthCount;
+  // xMarginを計算
+  const xMargin = Math.min(width, 40) * (matches ? 20 : 16) + 160;
 
   children.forEach((child, i) => {
     const { nodes: childNodes, totalHeight } = createTreeNodesWithPosition(
