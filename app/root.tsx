@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useParams,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import { ColorSchemeScript, Center } from "@mantine/core";
@@ -61,6 +62,7 @@ export default function App() {
   const [isOpen, setIsOpen] = useState(false);
   const removeIssue = useRemoveIssueAtom();
   const navigate = useNavigate();
+  const { treeId } = useParams();
   return (
     <>
       <Flex gap="xs" m="xs" align="center">
@@ -71,8 +73,8 @@ export default function App() {
         >
           <MenuIcon />
         </ActionIcon>
+        {treeId && <Link to={`/output/${treeId}`}>Output</Link>}
         {/* <Link to="/">Home</Link>
-        <Link to="/output">Output</Link>
         <Link to="/import">Import</Link> */}
       </Flex>
       <hr />

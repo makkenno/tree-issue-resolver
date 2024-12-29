@@ -1,8 +1,11 @@
+import { Flex } from "~/components/atoms/Flex/Flex";
 import { Stack } from "../../../atoms/Stack/Stack";
 import { Title } from "../../../atoms/Title/Title";
 import { Textarea } from "../../../molecules/Textarea/Textarea";
-import { useGetIssueTreeAtom } from "../../../../hooks/useIssueTreeAtom";
 import { FC, useMemo } from "react";
+import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
+import { CopyButton } from "~/components/atoms/CopyButton/CopyButton";
+import { Button } from "~/components/atoms/Button/Button";
 
 export const MarkdownOutputPage: FC = () => {
   const markdown = useGenerateMarkdown();
@@ -13,13 +16,29 @@ export const MarkdownOutputPage: FC = () => {
       </Title>
       <Stack>
         <Textarea value={markdown} autosize />
+        <Flex gap="xs">
+          <CopyButton value={markdown}>
+            {({ copied, copy }) => (
+              <Button
+                size="compact-xs"
+                w="fit-content"
+                variant="outline"
+                color={copied ? "teal" : "blue"}
+                onClick={copy}
+              >
+                {copied ? "コピーした" : "コピー"}
+              </Button>
+            )}
+          </CopyButton>
+        </Flex>
       </Stack>
     </>
   );
 };
 
 function useGenerateMarkdown(): string {
-  const issueTree = useGetIssueTreeAtom();
+  const issueTree = useIssueTreeAtom();
+  if (!issueTree) return "";
   return useMemo(() => generateMarkdown(issueTree), [issueTree]);
 }
 
