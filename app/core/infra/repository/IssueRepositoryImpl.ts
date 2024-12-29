@@ -1,4 +1,3 @@
-import { record } from "zod";
 import { Issue } from "~/core/domain/domain-entity/Issue";
 import { IssueRepository } from "~/core/domain/repository/IssueRepository";
 import { IssueId } from "~/core/domain/value-object/IssueId";
@@ -17,7 +16,7 @@ export class DexieIssueRepository implements IssueRepository {
   }
 
   public async saveRoot(issue: Issue): Promise<void> {
-    const records = this.createRecords(issue);
+    const records = this.createRecords(issue, 0);
     await db.issues.bulkAdd(records);
   }
 
@@ -41,56 +40,49 @@ export class DexieIssueRepository implements IssueRepository {
       throw new Error("Issue not found");
     }
 
-    const existingSubtree = this.buildSubtree(existingRecord, allRecords);
+    const existingIssueRecords = this.buildSubtree(
+      existingRecord,
+      allRecords
+    ).children.map((child, i) => ({
+      id: child.id.value,
+      title: child.title.value,
+      note: child.note.value,
+      isResolved: child.isResolved,
+      parentIssueId: issue.id.value,
+      order: i,
+      createdAt: child.createdAt,
+    }));
 
-    const { remove, add, update } = Object.groupBy(
-      [...issue.children, ...existingSubtree.children],
-      (child) => {
-        if (!existingSubtree.children.some((c) => c.id.isEqual(child.id))) {
-          return "add";
-        }
-        if (!issue.children.some((c) => c.id.isEqual(child.id))) {
-          return "remove";
-        }
-        return "update";
-      }
+    const newIssueRecords = issue.children.map((child, i) => ({
+      id: child.id.value,
+      title: child.title.value,
+      note: child.note.value,
+      isResolved: child.isResolved,
+      parentIssueId: issue.id.value,
+      order: i,
+      createdAt: child.createdAt,
+    }));
+
+    const remove = existingIssueRecords.filter(
+      (r) => !newIssueRecords.some((c) => c.id === r.id)
     );
 
+    const { add, update } = Object.groupBy(newIssueRecords, (child) => {
+      if (existingIssueRecords.some((c) => c.id === child.id)) {
+        return "update";
+      }
+      return "add";
+    });
+
     if (!!remove && remove.length > 0) {
-      await db.issues.bulkDelete(remove.map((r) => r.id.value));
+      await db.issues.bulkDelete(remove.map((r) => r.id));
     }
     if (!!add && add.length > 0) {
-      await db.issues.bulkAdd(
-        add.map((r) => ({
-          id: r.id.value,
-          title: r.title.value,
-          note: r.note.value,
-          isResolved: r.isResolved,
-          parentIssueId: issue.id.value,
-          createdAt: r.createdAt,
-        }))
-      );
+      await db.issues.bulkAdd(add);
     }
-    await db.issues.bulkPut([
-      {
-        id: issue.id.value,
-        title: issue.title.value,
-        note: issue.note.value,
-        isResolved: issue.isResolved,
-        parentIssueId: existingRecord.parentIssueId,
-        createdAt: issue.createdAt,
-      },
-      ...(update
-        ? update.map((r) => ({
-            id: r.id.value,
-            title: r.title.value,
-            note: r.note.value,
-            isResolved: r.isResolved,
-            parentIssueId: issue.id.value,
-            createdAt: r.createdAt,
-          }))
-        : []),
-    ]);
+    if (!!update && update.length > 0) {
+      await db.issues.bulkPut(update);
+    }
   }
 
   public async removeIssue(issueId: IssueId): Promise<void> {
@@ -100,17 +92,24 @@ export class DexieIssueRepository implements IssueRepository {
       throw new Error("Issue not found");
     }
     const subtree = this.buildSubtree(rootRecord, allRecords);
-    const targetIssues = this.createRecords(subtree).map((r) => r.id);
+    const targetIssues = this.createRecords(subtree, rootRecord.order).map(
+      (r) => r.id
+    );
     await db.issues.bulkDelete(targetIssues);
   }
 
-  private createRecords(issue: Issue, parentIssueId?: IssueId): IssueRecord[] {
+  private createRecords(
+    issue: Issue,
+    rootOrder: number,
+    parentIssueId?: IssueId
+  ): IssueRecord[] {
     const record: IssueRecord = {
       id: issue.id.value,
       title: issue.title.value,
       note: issue.note.value,
       isResolved: issue.isResolved,
       parentIssueId: parentIssueId ? parentIssueId.value : null,
+      order: rootOrder,
       createdAt: issue.createdAt,
     };
 
@@ -119,14 +118,16 @@ export class DexieIssueRepository implements IssueRepository {
     }
     return [
       record,
-      ...issue.children.flatMap((child) => this.createRecords(child, issue.id)),
+      ...issue.children.flatMap((child, i) =>
+        this.createRecords(child, i, issue.id)
+      ),
     ];
   }
 
   private buildSubtree(rootRec: IssueRecord, allRecords: IssueRecord[]): Issue {
-    const childRecords = allRecords.filter(
-      (r) => r.parentIssueId == rootRec.id
-    );
+    const childRecords = allRecords
+      .filter((r) => r.parentIssueId == rootRec.id)
+      .toSorted((a, b) => a.order - b.order);
 
     return new Issue(
       IssueId.fromString(rootRec.id),

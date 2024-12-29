@@ -6,6 +6,7 @@ export interface IssueRecord {
   note: string;
   isResolved: boolean;
   parentIssueId: string | null; // ルートなら null
+  order: number;
   createdAt: Date;
 }
 
@@ -14,8 +15,8 @@ class IssueDexieDB extends Dexie {
 
   constructor() {
     super("IssueDatabase");
-    this.version(1).stores({
-      issues: "id, parentIssueId, createdAt",
+    this.version(2).stores({
+      issues: "id, parentIssueId, createdAt, order",
     });
   }
 }
