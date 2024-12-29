@@ -4,7 +4,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigate,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import { ColorSchemeScript, Center } from "@mantine/core";
@@ -24,6 +23,7 @@ import { EditIcon } from "./components/atoms/Icon/Edit/Edit";
 import { Link } from "./components/atoms/Link/Link";
 import { CloseIcon } from "./components/atoms/Icon/Close/Close";
 import { useRemoveIssueAtom } from "./hooks/useIssuesAtom";
+import { useNavigate } from "./hooks/useNavigate";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

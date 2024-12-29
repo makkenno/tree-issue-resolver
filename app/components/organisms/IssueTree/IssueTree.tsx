@@ -18,12 +18,14 @@ interface IssueTreeProps {
 
 export const IssueTree: FC<IssueTreeProps> = ({ tree }) => {
   const { nodes, edges } = useIssueTree(tree);
+
   return (
     <Box style={{ height: "80vh", border: "1px solid gray" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={{ issueCard: IssueCardNode }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
       />
     </Box>
   );

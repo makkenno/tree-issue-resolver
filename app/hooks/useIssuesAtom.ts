@@ -15,6 +15,7 @@ const issueTitlesSchema = z
 export type IssueTitlesType = z.infer<typeof issueTitlesSchema>;
 
 type CreateRootIssueArgs = {
+  id: string;
   title: string;
   note: string;
   isResolved: boolean;
@@ -37,7 +38,7 @@ const createRootIssueAtom = atom(
   null,
   async (_get, set, args: CreateRootIssueArgs) => {
     await new CreateRootUseCase(new DexieIssueRepository()).execute({
-      id: crypto.randomUUID(),
+      id: args.id,
       title: args.title,
       note: args.note,
       isResolved: args.isResolved,

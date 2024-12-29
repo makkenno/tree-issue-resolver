@@ -1,9 +1,11 @@
 import { Title } from "../../../atoms/Title/Title";
 import { IssueForm } from "../../../organisms/IssueForm/IssueForm";
 import { useCreateRootIssueAtom } from "../../../../hooks/useIssuesAtom";
+import { useNavigate } from "~/hooks/useNavigate";
 
 export const CreateIssueFormPage = () => {
   const createRootIssue = useCreateRootIssueAtom();
+  const navigate = useNavigate();
   return (
     <>
       <Title order={4} my="md">
@@ -14,7 +16,11 @@ export const CreateIssueFormPage = () => {
         note={""}
         isResolved={false}
         children={[]}
-        onSubmit={createRootIssue}
+        onSubmit={async (value) => {
+          const id = crypto.randomUUID();
+          await createRootIssue({ ...value, id });
+          navigate(`/${id}`);
+        }}
       />
     </>
   );
