@@ -26,6 +26,7 @@ import { CloseIcon } from "./components/atoms/Icon/Close/Close";
 import { useNavigate } from "./hooks/useNavigate";
 import { useRemoveIssueAtom } from "./hooks/useRemoveIssueAtom";
 import { FileDownloadIcon } from "./components/atoms/Icon/FileDownload/FileDownload";
+import { Header } from "./components/organisms/Header/Header";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -66,21 +67,7 @@ export default function App() {
   const { treeId } = useParams();
   return (
     <>
-      <Flex gap="xs" m="xs" align="center">
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          onClick={() => setIsOpen(true)}
-        >
-          <MenuIcon />
-        </ActionIcon>
-        {treeId && (
-          <>
-            <Link to={`/${treeId}`}>Home</Link>
-            <Link to={`/output/${treeId}`}>Output</Link>
-          </>
-        )}
-      </Flex>
+      <Header treeId={treeId} onClickMenu={() => setIsOpen(true)} />
       <hr />
       <Box mb="xl">
         <Outlet />
