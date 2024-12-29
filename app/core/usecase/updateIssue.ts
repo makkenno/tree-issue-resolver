@@ -19,28 +19,42 @@ export class UpdateIssueUseCase {
   constructor(private repository: IssueRepository) {}
 
   public async execute(input: UpdateIssueInput): Promise<void> {
-    const issue = await this.repository.findIssueSubtree(
+    const existIssue = await this.repository.findIssueSubtree(
       IssueId.fromString(input.id)
     );
 
-    if (!issue) throw new Error("Issue not found");
+    if (!existIssue) throw new Error("Issue not found");
+
+    const childrenToUpdate = input.children.map((inputChild) => {
+      const existChild = existIssue.children.find((child) =>
+        child.id.isEqual(IssueId.fromString(inputChild.id))
+      );
+      if (existChild) {
+        return new Issue(
+          IssueId.fromString(inputChild.id),
+          new IssueTitle(inputChild.title),
+          existChild.note,
+          existChild.isResolved,
+          existChild.children,
+          existChild.createdAt
+        );
+      }
+      return new Issue(
+        IssueId.fromString(inputChild.id),
+        new IssueTitle(inputChild.title),
+        new IssueNote(""),
+        false,
+        [],
+        new Date()
+      );
+    });
 
     const updated = new Issue(
       IssueId.fromString(input.id),
       new IssueTitle(input.title),
       new IssueNote(input.note),
       input.isResolved,
-      input.children.map(
-        (child) =>
-          new Issue(
-            IssueId.fromString(child.id),
-            new IssueTitle(child.title),
-            new IssueNote(""),
-            false,
-            [],
-            new Date()
-          )
-      ),
+      childrenToUpdate,
       new Date()
     );
 
