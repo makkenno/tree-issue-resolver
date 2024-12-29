@@ -7,7 +7,7 @@ interface FindIssueInput {
   id: string;
 }
 
-interface FindIssueOutput {
+export interface FindIssueOutput {
   issue: IssueType;
 }
 

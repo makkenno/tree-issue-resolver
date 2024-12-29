@@ -9,6 +9,9 @@ import { NoteTextarea } from "./_components/NoteTextarea";
 import { IsResolvedCheckbox } from "./_components/IsResolvedCheckbox";
 import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
 import { FC } from "react";
+import { TextInput } from "~/components/molecules/TextInput/TextInput";
+import { Box } from "@mantine/core";
+import { i } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const title = z
   .string()
@@ -17,23 +20,26 @@ const title = z
 const note = z.string().max(2000, "2000文字以下で入力してください。");
 
 const issueSchema = z.object({
+  id: z.string().optional(),
   title,
   note,
   isResolved: z.boolean(),
-  children: z.array(z.object({ title })),
+  children: z.array(z.object({ id: z.string().min(1), title })),
 });
 
 export type IssueSchema = z.infer<typeof issueSchema>;
 
 interface IssueFormProps {
+  id?: string;
   title: string;
   note: string;
   isResolved: boolean;
-  children: { title: string }[];
+  children: { id: string; title: string }[];
   onSubmit: (value: IssueSchema) => Promise<void>;
 }
 
 export const IssueForm: FC<IssueFormProps> = ({
+  id,
   title,
   note,
   isResolved,
@@ -42,6 +48,7 @@ export const IssueForm: FC<IssueFormProps> = ({
 }) => {
   const form = useForm({
     defaultValues: {
+      id,
       title,
       note,
       isResolved,
@@ -64,6 +71,17 @@ export const IssueForm: FC<IssueFormProps> = ({
         form.state.isSubmitting = false;
       }}
     >
+      <form.Field
+        name="id"
+        children={(field) => (
+          <TextInput
+            id={field.name}
+            name={field.name}
+            value={field.state.value}
+            type="hidden"
+          />
+        )}
+      />
       <Stack gap="lg">
         <form.Field
           name="title"
@@ -82,9 +100,19 @@ export const IssueForm: FC<IssueFormProps> = ({
             return (
               <Fieldset legend="関連する子課題" bg="initial">
                 <Stack>
-                  {field.state.value.map((_, i) => {
-                    return (
-                      <form.Field key={i} name={`children[${i}].title`}>
+                  {field.state.value.map((_, i) => (
+                    <Box key={i}>
+                      <form.Field name={`children[${i}].id`}>
+                        {(subField) => (
+                          <TextInput
+                            id={subField.name}
+                            name={subField.name}
+                            value={subField.state.value}
+                            type="hidden"
+                          />
+                        )}
+                      </form.Field>
+                      <form.Field name={`children[${i}].title`}>
                         {(subField) => (
                           <ChildIssueTextInput
                             field={subField}
@@ -92,11 +120,14 @@ export const IssueForm: FC<IssueFormProps> = ({
                           />
                         )}
                       </form.Field>
-                    );
-                  })}
+                    </Box>
+                  ))}
                   <Button
                     variant="outline"
-                    onClick={() => field.pushValue({ title: "" })}
+                    onClick={() => {
+                      const id = crypto.randomUUID();
+                      field.pushValue({ id, title: "" });
+                    }}
                     type="button"
                   >
                     追加

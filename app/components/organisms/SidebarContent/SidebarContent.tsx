@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Box } from "~/components/atoms/Box/Box";
 import { NavItem } from "./_ui/NavItem/NavItem";
 
-interface SidebarContentProps {
+export interface SidebarContentProps {
   menus: {
     id: string;
     title: string;
@@ -20,6 +20,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
     <Box component="nav">
       {menus.map((menu) => (
         <NavItem
+          key={menu.id}
           to={`/${menu.id}`}
           label={menu.title}
           onDelete={() => onDeleteMenu(menu.id)}

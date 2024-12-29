@@ -7,11 +7,19 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import { Container, Flex, Box, ColorSchemeScript, Center } from "@mantine/core";
+import { ColorSchemeScript, Center } from "@mantine/core";
 import { Provider } from "./provider";
 import "@mantine/core/styles.css";
 import "./global.css";
 import { Loader } from "./components/atoms/Loader/Loader";
+import { MenuIcon } from "./components/atoms/Icon/Menu/Menu";
+import { Drawer } from "./components/molecules/Drawer/Drawer";
+import { Suspense, useState } from "react";
+import { Flex } from "./components/atoms/Flex/Flex";
+import { ActionIcon } from "./components/atoms/ActionIcon/ActionIcon";
+import { Box } from "./components/atoms/Box/Box";
+import { LoadingOverlay } from "./components/molecules/LoadingOverlay/LoadingOverlay";
+import { SidebarContentContainer } from "./components/organisms/SidebarContent/SidebarContentContainer";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -46,19 +54,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <Container>
-        <Flex gap="xs">
-          <Link to="/">Home</Link>
-          <Link to="/output">Output</Link>
-          <Link to="/import">Import</Link>
-        </Flex>
-      </Container>
+      <Flex gap="xs" m="xs" align="center">
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          onClick={() => setIsOpen(true)}
+        >
+          <MenuIcon />
+        </ActionIcon>
+        {/* <Link to="/">Home</Link>
+        <Link to="/output">Output</Link>
+        <Link to="/import">Import</Link> */}
+      </Flex>
       <hr />
       <Box mb="xl">
         <Outlet />
       </Box>
+      <Drawer opened={isOpen} onClose={() => setIsOpen(false)} title="Menu">
+        <Suspense fallback={<LoadingOverlay />}>
+          <SidebarContentContainer
+            onDeleteMenu={() => {}}
+            onClickNav={() => setIsOpen(false)}
+          />
+        </Suspense>
+      </Drawer>
     </>
   );
 }

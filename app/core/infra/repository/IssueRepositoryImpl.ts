@@ -1,6 +1,7 @@
 import { Issue } from "~/core/domain/domain-entity/Issue";
 import { IssueRepository } from "~/core/domain/repository/IssueRepository";
 import { IssueId } from "~/core/domain/value-object/IssueId";
+import { IssueNote } from "~/core/domain/value-object/IssueNote";
 import { IssueTitle } from "~/core/domain/value-object/IssueTitle";
 import { db, IssueRecord } from "~/core/infra/db/Issue";
 
@@ -43,12 +44,12 @@ export class DexieIssueRepository implements IssueRepository {
 
     const { remove, add, update } = Object.groupBy(
       [...issue.children, ...existingSubtree.children],
-      (issue) => {
-        if (!issue.children.some((c) => c.id.isEqual(issue.id))) {
-          return "remove";
-        }
-        if (!existingSubtree.children.some((c) => c.id.isEqual(issue.id))) {
+      (child) => {
+        if (!existingSubtree.children.some((c) => c.id.isEqual(child.id))) {
           return "add";
+        }
+        if (!issue.children.some((c) => c.id.isEqual(child.id))) {
+          return "remove";
         }
         return "update";
       }
@@ -118,7 +119,7 @@ export class DexieIssueRepository implements IssueRepository {
     return new Issue(
       IssueId.fromString(rootRec.id),
       new IssueTitle(rootRec.title),
-      new IssueTitle(rootRec.note),
+      new IssueNote(rootRec.note),
       rootRec.isResolved,
       childRecords.map((r) => this.buildSubtree(r, allRecords)),
       rootRec.createdAt

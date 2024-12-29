@@ -3,21 +3,17 @@ import { CopyButton } from "../../../atoms/CopyButton/CopyButton";
 import { Flex } from "../../../atoms/Flex/Flex";
 import { Stack } from "../../../atoms/Stack/Stack";
 import { IssueTree } from "../../../organisms/IssueTree/IssueTree";
-import {
-  useClearIssueTreeAtom,
-  useGetIssueTreeAtom,
-} from "../../../../hooks/useIssueTreeAtom";
+import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
 
-export const DisplayIssueTreePage = () => {
-  const issueTree = useGetIssueTreeAtom();
-  const clear = useClearIssueTreeAtom();
+export const DisplayIssueTreePageContainer = () => {
+  const issueTree = useIssueTreeAtom();
+
+  if (!issueTree) return <div>not found</div>;
+
   return (
     <Stack mt="md">
       <IssueTree tree={issueTree} />
       <Flex gap="xs">
-        <Button size="compact-xs" w="fit-content" onClick={clear}>
-          リセット
-        </Button>
         <CopyButton value={JSON.stringify(issueTree)}>
           {({ copied, copy }) => (
             <Button

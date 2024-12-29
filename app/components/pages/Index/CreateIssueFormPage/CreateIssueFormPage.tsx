@@ -1,12 +1,8 @@
 import { Title } from "../../../atoms/Title/Title";
 import { IssueForm } from "../../../organisms/IssueForm/IssueForm";
-import {
-  useCreateRootIssueAtom,
-  useGetIssueTreeAtom,
-} from "../../../../hooks/useIssueTreeAtom";
+import { useCreateRootIssueAtom } from "../../../../hooks/useIssuesAtom";
 
 export const CreateIssueFormPage = () => {
-  const issueTree = useGetIssueTreeAtom();
   const createRootIssue = useCreateRootIssueAtom();
   return (
     <>
@@ -14,15 +10,11 @@ export const CreateIssueFormPage = () => {
         課題の登録
       </Title>
       <IssueForm
-        title={issueTree.title}
-        note={issueTree.note}
-        isResolved={issueTree.isResolved}
-        children={issueTree.children}
-        onSubmit={(value) =>
-          new Promise(() => {
-            createRootIssue(value);
-          })
-        }
+        title={""}
+        note={""}
+        isResolved={false}
+        children={[]}
+        onSubmit={createRootIssue}
       />
     </>
   );

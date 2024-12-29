@@ -1,10 +1,12 @@
 import { Title } from "~/components/atoms/Title/Title";
 import { IssueForm } from "~/components/organisms/IssueForm/IssueForm";
-import { IssueNodeType, useEditIssueNodeAtom } from "~/hooks/useIssueTreeAtom";
+import { IssueNodeType } from "~/hooks/useIssueTreeAtom";
 import { useNavigate } from "~/hooks/useNavigate";
 import { FC } from "react";
+import { useParams } from "@remix-run/react";
+import { useUpdateIssueNodeAtom } from "~/hooks/useUpdateIssueNodeAtom";
 
-interface EditIssueFormPageProps {
+export interface EditIssueFormPageProps {
   nodeId: string;
   title: string;
   note: string;
@@ -19,7 +21,8 @@ export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({
   isResolved,
   children,
 }) => {
-  const editIssueNode = useEditIssueNodeAtom();
+  const { treeId } = useParams();
+  const updateIssueNode = useUpdateIssueNodeAtom();
   const navigate = useNavigate();
 
   return (
@@ -28,16 +31,15 @@ export const EditIssueFormPage: FC<EditIssueFormPageProps> = ({
         課題の編集
       </Title>
       <IssueForm
+        id={nodeId}
         title={title}
         note={note}
         isResolved={isResolved}
         children={children}
-        onSubmit={(value) =>
-          new Promise(() => {
-            editIssueNode({ id: nodeId, ...value });
-            navigate("/");
-          })
-        }
+        onSubmit={async (value) => {
+          await updateIssueNode({ id: nodeId, ...value });
+          navigate(`/${treeId}`);
+        }}
       />
     </>
   );
