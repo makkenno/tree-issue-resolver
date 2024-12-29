@@ -1,5 +1,4 @@
 import { atom, useAtom } from "jotai";
-import { z } from "zod";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { UpdateIssueUseCase } from "~/core/usecase/updateIssue";
 import { refetchIssueTreeAtom } from "./useIssueRootAtom";

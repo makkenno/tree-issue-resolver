@@ -1,10 +1,10 @@
 import { Title } from "~/components/atoms/Title/Title";
 import { IssueForm } from "~/components/organisms/IssueForm/IssueForm";
-import { IssueNodeType } from "~/hooks/useIssueTreeAtom";
 import { useNavigate } from "~/hooks/useNavigate";
 import { FC } from "react";
 import { useParams } from "@remix-run/react";
 import { useUpdateIssueNodeAtom } from "~/hooks/useUpdateIssueNodeAtom";
+import { IssueNodeType } from "~/hooks/useIssueRootAtom";
 
 export interface EditIssueFormPageProps {
   nodeId: string;
