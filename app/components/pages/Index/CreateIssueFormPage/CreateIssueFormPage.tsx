@@ -1,6 +1,6 @@
+import { useCreateRootIssueAtom } from "~/hooks/useCreateRootIssueAtom";
 import { Title } from "../../../atoms/Title/Title";
 import { IssueForm } from "../../../organisms/IssueForm/IssueForm";
-import { useCreateRootIssueAtom } from "../../../../hooks/useIssuesAtom";
 import { useNavigate } from "~/hooks/useNavigate";
 
 export const CreateIssueFormPage = () => {

@@ -11,7 +11,6 @@ import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
 import { FC } from "react";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
 import { Box } from "@mantine/core";
-import { i } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const title = z
   .string()

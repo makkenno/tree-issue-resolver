@@ -1,30 +1,9 @@
 import { atom, useAtom } from "jotai";
-import { z } from "zod";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
-import { CreateRootUseCase } from "~/core/usecase/createRoot";
 import { GetIssuesUseCase } from "~/core/usecase/getIssues";
-import { RemoveIssueUseCase } from "~/core/usecase/removeIssue";
+import { issueTitlesSchema } from "~/lib/zodSchema/issueTitleSchema";
 
-const issueTitlesSchema = z
-  .object({
-    id: z.string().min(1),
-    title: z.string().min(1),
-  })
-  .array();
-
-export type IssueTitlesType = z.infer<typeof issueTitlesSchema>;
-
-type CreateRootIssueArgs = {
-  id: string;
-  title: string;
-  note: string;
-  isResolved: boolean;
-  children: {
-    title: string;
-  }[];
-};
-
-const refetchIssueTitlesAtom = atom(0);
+export const refetchIssueTitlesAtom = atom(0);
 
 const issueTitlesAtom = atom(async (get) => {
   get(refetchIssueTitlesAtom);
@@ -34,41 +13,7 @@ const issueTitlesAtom = atom(async (get) => {
   return issueTitlesSchema.parse(issueTitles);
 });
 
-const createRootIssueAtom = atom(
-  null,
-  async (_get, set, args: CreateRootIssueArgs) => {
-    await new CreateRootUseCase(new DexieIssueRepository()).execute({
-      id: args.id,
-      title: args.title,
-      note: args.note,
-      isResolved: args.isResolved,
-      children: args.children.map((child) => ({
-        id: crypto.randomUUID(),
-        title: child.title,
-      })),
-    });
-    set(refetchIssueTitlesAtom, (prev) => prev + 1);
-  }
-);
-
-const removeIssueAtom = atom(null, async (_get, set, args: { id: string }) => {
-  await new RemoveIssueUseCase(new DexieIssueRepository()).execute({
-    id: args.id,
-  });
-  set(refetchIssueTitlesAtom, (prev) => prev + 1);
-});
-
 export const useIssueTitlesAtom = () => {
   const [issueTitles] = useAtom(issueTitlesAtom);
   return issueTitles;
-};
-
-export const useCreateRootIssueAtom = () => {
-  const [_, createRootIssue] = useAtom(createRootIssueAtom);
-  return createRootIssue;
-};
-
-export const useRemoveIssueAtom = () => {
-  const [_, removeIssue] = useAtom(removeIssueAtom);
-  return removeIssue;
 };

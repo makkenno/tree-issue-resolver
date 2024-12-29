@@ -23,8 +23,9 @@ import { SidebarContentContainer } from "./components/organisms/SidebarContent/S
 import { EditIcon } from "./components/atoms/Icon/Edit/Edit";
 import { Link } from "./components/atoms/Link/Link";
 import { CloseIcon } from "./components/atoms/Icon/Close/Close";
-import { useRemoveIssueAtom } from "./hooks/useIssuesAtom";
 import { useNavigate } from "./hooks/useNavigate";
+import { useRemoveIssueAtom } from "./hooks/useRemoveIssueAtom";
+import { FileDownloadIcon } from "./components/atoms/Icon/FileDownload/FileDownload";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -73,9 +74,12 @@ export default function App() {
         >
           <MenuIcon />
         </ActionIcon>
-        {treeId && <Link to={`/output/${treeId}`}>Output</Link>}
-        {/* <Link to="/">Home</Link>
-        <Link to="/import">Import</Link> */}
+        {treeId && (
+          <>
+            <Link to={`/${treeId}`}>Home</Link>
+            <Link to={`/output/${treeId}`}>Output</Link>
+          </>
+        )}
       </Flex>
       <hr />
       <Box mb="xl">
@@ -94,11 +98,18 @@ export default function App() {
           >
             <CloseIcon />
           </ActionIcon>
-          <Link to="/" onClick={() => setIsOpen(false)}>
-            <ActionIcon variant="subtle" color="gray">
-              <EditIcon />
-            </ActionIcon>
-          </Link>
+          <Flex gap="xs">
+            <Link to="/import" onClick={() => setIsOpen(false)}>
+              <ActionIcon variant="subtle" color="gray">
+                <FileDownloadIcon />
+              </ActionIcon>
+            </Link>
+            <Link to="/" onClick={() => setIsOpen(false)}>
+              <ActionIcon variant="subtle" color="gray">
+                <EditIcon />
+              </ActionIcon>
+            </Link>
+          </Flex>
         </Flex>
         <Suspense fallback={<LoadingOverlay />}>
           <SidebarContentContainer
