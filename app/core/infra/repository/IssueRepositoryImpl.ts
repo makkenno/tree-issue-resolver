@@ -34,55 +34,71 @@ export class DexieIssueRepository implements IssueRepository {
   // つまり、既存のtreeと新しいtreeの差分をとる
   // 親とその子供の二階層分だけ考える
   public async updateIssue(issue: Issue): Promise<void> {
-    const allRecords = await db.issues.toArray();
-    const existingRecord = allRecords.find((r) => r.id === issue.id.value);
-    if (existingRecord === undefined) {
+    const allIssueRecords = await db.issues.toArray();
+    const targetRecord = allIssueRecords.find(
+      (record) => record.id === issue.id.value
+    );
+    if (targetRecord === undefined) {
       throw new Error("Issue not found");
     }
 
-    const existingIssueRecords = this.buildSubtree(
-      existingRecord,
-      allRecords
-    ).children.map((child, i) => ({
-      id: child.id.value,
-      title: child.title.value,
-      note: child.note.value,
-      isResolved: child.isResolved,
+    const currentChildRecords = this.buildSubtree(
+      targetRecord,
+      allIssueRecords
+    ).children.map((childIssue, index) => ({
+      id: childIssue.id.value,
+      title: childIssue.title.value,
+      note: childIssue.note.value,
+      isResolved: childIssue.isResolved,
       parentIssueId: issue.id.value,
-      order: i,
-      createdAt: child.createdAt,
+      order: index,
+      createdAt: childIssue.createdAt,
     }));
 
-    const newIssueRecords = issue.children.map((child, i) => ({
-      id: child.id.value,
-      title: child.title.value,
-      note: child.note.value,
-      isResolved: child.isResolved,
+    const updatedParentRecord = {
+      id: issue.id.value,
+      title: issue.title.value,
+      note: issue.note.value,
+      isResolved: issue.isResolved,
+      parentIssueId: targetRecord.parentIssueId,
+      order: targetRecord.order,
+      createdAt: issue.createdAt,
+    };
+
+    const updatedChildRecords = issue.children.map((childIssue, index) => ({
+      id: childIssue.id.value,
+      title: childIssue.title.value,
+      note: childIssue.note.value,
+      isResolved: childIssue.isResolved,
       parentIssueId: issue.id.value,
-      order: i,
-      createdAt: child.createdAt,
+      order: index,
+      createdAt: childIssue.createdAt,
     }));
 
-    const remove = existingIssueRecords.filter(
-      (r) => !newIssueRecords.some((c) => c.id === r.id)
+    const recordsToDelete = currentChildRecords.filter(
+      (record) => !updatedChildRecords.some((child) => child.id === record.id)
     );
 
-    const { add, update } = Object.groupBy(newIssueRecords, (child) => {
-      if (existingIssueRecords.some((c) => c.id === child.id)) {
-        return "update";
+    const { add: recordsToAdd, update: recordsToUpdate } = Object.groupBy(
+      updatedChildRecords,
+      (child) => {
+        if (currentChildRecords.some((current) => current.id === child.id)) {
+          return "update";
+        }
+        return "add";
       }
-      return "add";
-    });
+    );
 
-    if (!!remove && remove.length > 0) {
-      await db.issues.bulkDelete(remove.map((r) => r.id));
+    if (!!recordsToDelete && recordsToDelete.length > 0) {
+      await db.issues.bulkDelete(recordsToDelete.map((record) => record.id));
     }
-    if (!!add && add.length > 0) {
-      await db.issues.bulkAdd(add);
+    if (!!recordsToAdd && recordsToAdd.length > 0) {
+      await db.issues.bulkAdd(recordsToAdd);
     }
-    if (!!update && update.length > 0) {
-      await db.issues.bulkPut(update);
+    if (!!recordsToUpdate && recordsToUpdate.length > 0) {
+      await db.issues.bulkPut([updatedParentRecord, ...recordsToUpdate]);
     }
+    await db.issues.put(updatedParentRecord);
   }
 
   public async removeIssue(issueId: IssueId): Promise<void> {
