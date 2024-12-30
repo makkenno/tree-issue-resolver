@@ -102,7 +102,6 @@ export default function App() {
           <SidebarContentContainer
             onDeleteMenu={async (id) => {
               await removeIssue({ id });
-              setIsOpen(false);
               navigate("/");
             }}
             onClickNav={() => setIsOpen(false)}
