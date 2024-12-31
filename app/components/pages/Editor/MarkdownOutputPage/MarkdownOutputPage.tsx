@@ -1,21 +1,59 @@
 import { Flex } from "~/components/atoms/Flex/Flex";
 import { Stack } from "../../../atoms/Stack/Stack";
-import { Title } from "../../../atoms/Title/Title";
-import { Textarea } from "../../../molecules/Textarea/Textarea";
+import { Box } from "~/components/atoms/Box/Box";
 import { FC, useMemo } from "react";
 import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
 import { CopyButton } from "~/components/atoms/CopyButton/CopyButton";
 import { Button } from "~/components/atoms/Button/Button";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 
 export const MarkdownOutputPage: FC = () => {
   const markdown = useGenerateMarkdown();
   return (
     <>
-      <Title order={4} my="md">
-        出力
-      </Title>
       <Stack>
-        <Textarea value={markdown} autosize />
+        <Box>
+          <Markdown
+            remarkPlugins={[remarkGfm, remarkBreaks]}
+            components={{
+              h2: ({ children }) => (
+                <h2
+                  style={{
+                    borderBottom: "1px solid #c9c9c9",
+                    marginTop: "56px",
+                  }}
+                >
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3
+                  style={{
+                    marginTop: "32px",
+                  }}
+                >
+                  {children}
+                </h3>
+              ),
+              h4: ({ children }) => (
+                <h4
+                  style={{
+                    marginTop: "24px",
+                  }}
+                >
+                  {children}
+                </h4>
+              ),
+              p: ({ children }) => (
+                <p style={{ marginBottom: "1em" }}>{children}</p>
+              ),
+            }}
+          >
+            {markdown}
+          </Markdown>
+        </Box>
         <Flex gap="xs">
           <CopyButton value={markdown}>
             {({ copied, copy }) => (

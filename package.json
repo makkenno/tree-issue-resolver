@@ -55,6 +55,9 @@
     "jotai": "^2.10.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.0",
     "storybook-dark-mode": "^4.0.2",
     "zod": "^3.23.8"
   },
