@@ -18,6 +18,15 @@ export const MarkdownOutputPage: FC = () => {
           <Markdown
             remarkPlugins={[remarkGfm, remarkBreaks]}
             components={{
+              h1: ({ children }) => (
+                <h1
+                  style={{
+                    fontSize: "28px",
+                  }}
+                >
+                  {children}
+                </h1>
+              ),
               h2: ({ children }) => (
                 <h2
                   style={{
