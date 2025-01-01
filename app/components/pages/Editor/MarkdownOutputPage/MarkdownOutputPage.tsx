@@ -62,7 +62,7 @@ export const MarkdownOutputPage: FC = () => {
                 </h4>
               ),
               p: ({ children }) => (
-                <p style={{ marginBottom: "14px", fontSize: "14px" }}>
+                <p style={{ marginBottom: "16px", fontSize: "16px" }}>
                   {children}
                 </p>
               ),
@@ -87,7 +87,7 @@ export const MarkdownOutputPage: FC = () => {
               li: ({ children }) => (
                 <li
                   style={{
-                    fontSize: "14px",
+                    fontSize: "16px",
                   }}
                 >
                   {children}
