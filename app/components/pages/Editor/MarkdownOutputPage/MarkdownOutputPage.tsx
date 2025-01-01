@@ -8,6 +8,8 @@ import { Button } from "~/components/atoms/Button/Button";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import { Pre } from "./Pre";
+import { Code } from "./Code";
 
 export const MarkdownOutputPage: FC = () => {
   const markdown = useGenerateMarkdown();
@@ -93,6 +95,8 @@ export const MarkdownOutputPage: FC = () => {
                   {children}
                 </li>
               ),
+              pre: Pre,
+              code: Code,
             }}
           >
             {markdown}
