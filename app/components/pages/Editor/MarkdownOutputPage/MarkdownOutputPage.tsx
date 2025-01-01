@@ -21,7 +21,7 @@ export const MarkdownOutputPage: FC = () => {
               h1: ({ children }) => (
                 <h1
                   style={{
-                    fontSize: "28px",
+                    fontSize: "24px",
                   }}
                 >
                   {children}
@@ -31,7 +31,7 @@ export const MarkdownOutputPage: FC = () => {
                 <h2
                   style={{
                     borderBottom: "1px solid #c9c9c9",
-                    fontSize: "26px",
+                    fontSize: "22px",
                     marginTop: "56px",
                     marginBottom: "16px",
                   }}
