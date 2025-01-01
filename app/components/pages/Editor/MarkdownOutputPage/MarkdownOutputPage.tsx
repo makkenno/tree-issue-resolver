@@ -31,7 +31,9 @@ export const MarkdownOutputPage: FC = () => {
                 <h2
                   style={{
                     borderBottom: "1px solid #c9c9c9",
+                    fontSize: "26px",
                     marginTop: "56px",
+                    marginBottom: "16px",
                   }}
                 >
                   {children}
@@ -40,7 +42,9 @@ export const MarkdownOutputPage: FC = () => {
               h3: ({ children }) => (
                 <h3
                   style={{
+                    fontSize: "20px",
                     marginTop: "32px",
+                    marginBottom: "16px",
                   }}
                 >
                   {children}
@@ -49,14 +53,45 @@ export const MarkdownOutputPage: FC = () => {
               h4: ({ children }) => (
                 <h4
                   style={{
+                    fontSize: "18px",
                     marginTop: "24px",
+                    marginBottom: "16px",
                   }}
                 >
                   {children}
                 </h4>
               ),
               p: ({ children }) => (
-                <p style={{ marginBottom: "1em" }}>{children}</p>
+                <p style={{ marginBottom: "14px", fontSize: "14px" }}>
+                  {children}
+                </p>
+              ),
+              ul: ({ children }) => (
+                <ul
+                  style={{
+                    paddingInlineStart: "24px",
+                  }}
+                >
+                  {children}
+                </ul>
+              ),
+              ol: ({ children }) => (
+                <ol
+                  style={{
+                    paddingInlineStart: "24px",
+                  }}
+                >
+                  {children}
+                </ol>
+              ),
+              li: ({ children }) => (
+                <li
+                  style={{
+                    fontSize: "14px",
+                  }}
+                >
+                  {children}
+                </li>
               ),
             }}
           >
