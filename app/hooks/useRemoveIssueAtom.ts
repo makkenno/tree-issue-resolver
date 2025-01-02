@@ -1,4 +1,4 @@
-import { atom, useAtom } from "jotai";
+import { atom, useSetAtom } from "jotai";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { RemoveIssueUseCase } from "~/core/usecase/removeIssue";
 import { refetchIssueTitlesAtom } from "./useIssuesAtom";
@@ -11,6 +11,5 @@ const removeIssueAtom = atom(null, async (_get, set, args: { id: string }) => {
 });
 
 export const useRemoveIssueAtom = () => {
-  const [_, removeIssue] = useAtom(removeIssueAtom);
-  return removeIssue;
+  return useSetAtom(removeIssueAtom);
 };

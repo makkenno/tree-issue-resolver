@@ -1,8 +1,9 @@
-import { atom, useAtom } from "jotai";
+import { atom, useSetAtom } from "jotai";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { UpdateIssueUseCase } from "~/core/usecase/updateIssue";
 import { refetchIssueTreeAtom } from "./useIssueRootAtom";
 import { refetchIssueNodeAtom } from "./useIssueNodeAtom";
+import { refetchIssueTitlesAtom } from "./useIssuesAtom";
 
 type UpdateIssueNodeArgs = {
   id: string;
@@ -28,12 +29,12 @@ const updateIssueNodeAtom = atom(
         title: child.title,
       })),
     });
+    set(refetchIssueTitlesAtom, (prev) => prev + 1);
     set(refetchIssueTreeAtom, (prev) => prev + 1);
     set(refetchIssueNodeAtom, (prev) => prev + 1);
   }
 );
 
 export const useUpdateIssueNodeAtom = () => {
-  const [_, updateIssueNode] = useAtom(updateIssueNodeAtom);
-  return updateIssueNode;
+  return useSetAtom(updateIssueNodeAtom);
 };

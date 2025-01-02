@@ -1,5 +1,5 @@
 import { Container } from "@mantine/core";
-import { FC, useState } from "react";
+import { useState } from "react";
 import { Button } from "~/components/atoms/Button/Button";
 import { Stack } from "~/components/atoms/Stack/Stack";
 import { Title } from "~/components/atoms/Title/Title";

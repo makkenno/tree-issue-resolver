@@ -1,4 +1,4 @@
-import { atom, useAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { FindIssueUseCase } from "~/core/usecase/findIssue";
 import { issueTreeSchema } from "~/lib/zodSchema/issueTreeSchema";
@@ -22,11 +22,9 @@ const issueTreeAtom = atom(async (get) => {
 });
 
 export const useSetIssueTreeIdAtom = () => {
-  const [_, setIssueTreeId] = useAtom(issueTreeIdAtom);
-  return setIssueTreeId;
+  return useSetAtom(issueTreeIdAtom);
 };
 
 export const useIssueTreeAtom = () => {
-  const [issueNode, _] = useAtom(issueTreeAtom);
-  return issueNode;
+  return useAtomValue(issueTreeAtom);
 };

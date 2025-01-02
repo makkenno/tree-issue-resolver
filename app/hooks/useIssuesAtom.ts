@@ -1,4 +1,4 @@
-import { atom, useAtom } from "jotai";
+import { atom, useAtomValue } from "jotai";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { GetIssuesUseCase } from "~/core/usecase/getIssues";
 import { issueTitlesSchema } from "~/lib/zodSchema/issueTitleSchema";
@@ -14,6 +14,5 @@ const issueTitlesAtom = atom(async (get) => {
 });
 
 export const useIssueTitlesAtom = () => {
-  const [issueTitles] = useAtom(issueTitlesAtom);
-  return issueTitles;
+  return useAtomValue(issueTitlesAtom);
 };

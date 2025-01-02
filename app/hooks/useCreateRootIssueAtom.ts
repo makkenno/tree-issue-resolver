@@ -1,4 +1,4 @@
-import { atom, useAtom } from "jotai";
+import { atom, useSetAtom } from "jotai";
 import { DexieIssueRepository } from "~/core/infra/repository/IssueRepositoryImpl";
 import { CreateRootUseCase } from "~/core/usecase/createRoot";
 import { refetchIssueTitlesAtom } from "./useIssuesAtom";
@@ -31,6 +31,5 @@ const createRootIssueAtom = atom(
 );
 
 export const useCreateRootIssueAtom = () => {
-  const [_, createRootIssue] = useAtom(createRootIssueAtom);
-  return createRootIssue;
+  return useSetAtom(createRootIssueAtom);
 };
