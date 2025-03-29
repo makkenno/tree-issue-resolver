@@ -1,0 +1,1926 @@
+# コーディングルール (Coding Rules)
+
+## 目次 (Table of Contents)
+
+1. [開発の進め方（Development Process）](#開発の進め方development-process)
+2. [プロジェクト構造 (Project Structure)](#プロジェクト構造-project-structure)
+3. [コーディング規約 (Coding Conventions)](#コーディング規約-coding-conventions)
+4. [コンポーネント開発 (Component Development)](#コンポーネント開発-component-development)
+5. [状態管理 (State Management)](#状態管理-state-management)
+6. [データ連携 (Data Integration)](#データ連携-data-integration)
+7. [スタイリング (Styling)](#スタイリング-styling)
+8. [テスト (Testing)](#テスト-testing)
+9. [品質管理 (Quality Assurance)](#品質管理-quality-assurance)
+10. [アクセシビリティ (Accessibility)](#アクセシビリティ-accessibility)
+11. [共通リソース管理 (Common Resources)](#共通リソース管理-common-resources)
+
+## 開発の進め方（Development Process）
+
+### 必須の品質チェック
+
+すべてのコード変更は、以下の品質チェックに合格する必要があります：
+
+1. リンターチェック
+
+   - `pnpm lint`によるコードスタイルとフォーマットのチェック
+   - `pnpm ls-lint`によるファイル名の命名規則チェック
+     - 上記二つはコミット前に自動実行されます（husky + lint-staged による設定）
+   - `pnpm type-check`による TypeScript の型チェック
+   - `pnpm knip` で未使用のコードや依存関係の検出
+   - `pnpm steiger` でインポート循環参照のチェック
+
+2. 型チェック
+
+   - `pnpm type-check`による TypeScript の型チェック
+
+3. テスト
+   - `pnpm test`によるユニットテストの実行
+   - すべてのテストが PASS することを確認
+
+### 開発フロー
+
+1. 開発開始時
+
+   - 依存パッケージのインストール: `pnpm install`
+   - 開発サーバーの起動: `pnpm dev`
+
+2. コード作成時
+
+   - コンポーネント作成: `pnpm plop`を使用して一貫した構造のコードを生成
+   - Storybook での UI 開発: `pnpm storybook`
+
+3. コミット前
+
+   - `pnpm type-check` で型エラーがないことを確認
+   - `pnpm lint` でコードスタイルのチェック
+   - `pnpm ls-lint` でファイル名の命名規則チェック
+   - `pnpm test` でテストが通ることを確認
+
+### 注意事項
+
+- Node.js と pnpm のバージョン管理には volta を使用しています
+- GraphQL スキーマの型生成が必要な場合は `pnpm codegen` を実行してください
+- コードカバレッジの確認は `pnpm test:coverage` で実行できます
+
+## プロジェクト構造 (Project Structure)
+
+このプロジェクトは、Feature Sliced Architecture に基づいて構築されています。このアーキテクチャは、コードの可読性、保守性、再利用性を高めることを目的としています。
+
+### 1. アーキテクチャの基本構造
+
+#### 1.1 レイヤー構造
+
+- 7 つのレイヤーを責任範囲の大きい順に配置
+  1. App: アプリケーション全体の設定や構成
+  2. Processes: （非推奨）
+  3. Pages: ページ/画面単位のコンポーネント
+  4. Widgets: 再利用可能な大規模 UI ブロック
+  5. Features: ユーザーの主要な操作機能
+  6. Entities: ビジネスエンティティ
+  7. Shared: 共通基盤
+
+注意点：
+
+- すべてのレイヤーを使用する必要はない
+- 多くのフロントエンドプロジェクトでは最低限、Shared、Pages、App レイヤーは必要
+- レイヤーは小文字のフォルダ名で表現（例：📁 shared, 📁 pages, 📁 app）
+- 新しいレイヤーの追加は推奨されない（セマンティクスが標準化されているため）
+
+#### 1.1.1 レイヤー間のインポートルール
+
+レイヤー間の依存関係に関する重要なルール：
+
+1. モジュールは**自身より下位のレイヤーのみ**からインポートが可能
+   例：features レイヤーのファイルは、entities と shared レイヤーからのみインポート可能
+
+2. 例外的なレイヤー：
+
+   - App レイヤー：レイヤーでありながら同時に 1 つのスライスとして機能
+   - Shared レイヤー：同様にレイヤーかつスライスとして機能
+   - これらのレイヤーはセグメント間で自由に相互参照可能
+
+3. スライスの独立性：
+   - 同一レイヤー内の異なるスライス間のインポートは禁止
+   - 例：features/aaa 内のファイルは features/bbb からインポート不可
+   - ただし、同一スライス内（features/aaa 内）での参照は許可
+
+これらのルールは、アプリケーションの保守性と予測可能性を高めるために重要です。
+
+#### 1.1.2 レイヤー選択の指針
+
+レイヤーの選択基準：
+
+1. コードの責任範囲
+2. 他のモジュールへの依存度
+3. 再利用性
+
+以下の点に注意して適切なレイヤーを選択してください：
+
+- すべてのレイヤーを使用する必要はない
+- 最小構成は通常、App、Pages、Shared の 3 レイヤー
+- 新しいレイヤーの追加は非推奨
+- レイヤー名は小文字で統一（例：shared, features）
+
+各レイヤーの詳細：
+
+##### Shared レイヤー
+
+- 外部世界との接続点（バックエンド、サードパーティライブラリ、環境など）
+- 独自の高度に独立したライブラリの定義場所
+- ビジネスドメインは存在しないため、スライスは持たない
+
+##### Entities レイヤー
+
+- プロジェクトが扱う実世界の概念を表現
+- ビジネス用語で表現される（例：User、Post、Group など）
+- データストレージ、バリデーションスキーマ、API 関連機能、UI 表現を含む
+- エンティティ間の関係は@x 記法で明示的に定義
+
+##### Features レイヤー
+
+- ユーザーが実行する主要な操作機能
+- 複数のページで再利用される機能が該当
+- 重要な機能に焦点を当て、過度に細分化しない
+
+##### Widgets レイヤー
+
+- 大規模で自己完結型の UI ブロック
+- 複数のページで再利用される場合や、ページ内の独立した大規模ブロックとして使用
+- ネストされたルーティングシステムでは Pages レイヤーのように使用可能
+
+##### Pages レイヤー
+
+- Web サイトやアプリケーションの画面を構成
+- 類似ページは 1 つのスライスにグループ化可能
+- UI ブロック、ローディング状態、エラーバウンダリ、データフェッチングを含む
+
+### 1.2 インポートルール
+
+- 上位レイヤーは下位レイヤーのみを参照可能
+- 同一レイヤー内の他のスライスは参照不可
+- App 層と Shared 層は例外として相互参照可能
+
+### 2. スライスの設計原則
+
+#### 2.1 基本ルール
+
+- 各レイヤー内でビジネスドメイン単位に分割
+- 独立性（低結合）と凝集度の高さを維持
+- App 層と Shared 層はスライスを持たない
+
+#### 2.2 パブリック API の設計
+
+- 各スライスは必ずパブリック API を定義
+- 外部からの参照はパブリック API のみを許可
+- パブリック API の実装方法：
+  ```ts
+  // index.tsによる再エクスポート
+  export { ComponentA } from "./ui/ComponentA";
+  export { ComponentB } from "./ui/ComponentB";
+  ```
+
+#### 2.3 クロスインポートの扱い
+
+- @x 記法を使用してエンティティ間の参照を明示的に定義
+- Entities 層でのみ推奨
+- 使用例：
+  ```
+  📂 entities
+    📂 A
+      📂 @x
+        📄 B.ts  // B専用のパブリックAPI
+      📄 index.ts  // 通常のパブリックAPI
+  ```
+
+#### 2.4 スライスの独立性と凝集度
+
+スライスの設計における重要な原則：
+
+##### 2.4.1 ゼロカップリング（独立性）
+
+- 同じレイヤー内の他のスライスとの依存関係を持たない
+- 他のスライスとの通信は下位レイヤーを通じてのみ行う
+- スライスグループ内でもコード共有は禁止
+
+##### 2.4.2 高凝集度
+
+- スライスは主要な目的に関連するコードを可能な限り含める
+- 例）写真ギャラリーアプリの場合：
+  - photo: 写真関連の全機能
+  - effects: 画像効果関連の全機能
+  - gallery-page: ギャラリーページ特有の全機能
+
+##### 2.4.3 スライスグループの扱い
+
+```
+📂 features
+  📂 post（グループフォルダ）
+    📂 compose
+      📄 index.ts
+    📂 like
+      📄 index.ts
+    📂 delete
+      📄 index.ts
+    ❌ shared-code.ts  // 禁止：グループ内での共有コード
+```
+
+- 関連するスライスはフォルダでグループ化可能
+- グループ内でも各スライスは独立性を保つ
+- グループ内での共有コードは作成しない
+
+### 3. セグメントの構成
+
+#### 3.1 標準セグメント
+
+- ui: UI 表示関連（コンポーネント、フォーマッタなど）
+- api: バックエンド連携（リクエスト、データ型など）
+- model: データモデル（スキーマ、インターフェース、ストア）
+- lib: ライブラリコード
+- config: 設定とフィーチャーフラグ
+
+#### 3.2 レイヤー別セグメント例
+
+##### Shared 層
+
+- api: API クライアント
+- ui: UI キット
+- lib: 内部ライブラリ
+- config: 環境変数、グローバル設定
+- routes: ルート定数
+- i18n: 翻訳関連
+
+##### App 層
+
+- routes: ルーター設定
+- store: グローバルストア設定
+- styles: グローバルスタイル
+- entrypoint: アプリケーションエントリーポイント
+
+#### 3.3 カスタムセグメント
+
+標準セグメント以外のセグメントを作成する場合の注意点：
+
+1. 命名規則
+
+   - 目的を表す名前を使用
+   - 実装の本質を表す名前は避ける
+
+2. 良い例と悪い例
+
+   ```
+   ✅ 良い例：
+   - analytics: 分析関連のコード
+   - validation: 検証ロジック
+   - constants: ビジネスロジック定数
+
+   ❌ 悪い例：
+   - components: 実装の本質を表すだけ
+   - hooks: 技術的な分類のみ
+   - types: 型定義の集まりを示すだけ
+   ```
+
+3. 推奨される使用場所
+   - App 層：アプリケーション全体に関わる機能
+   - Shared 層：共通基盤機能
+
+### 4. パフォーマンスと保守性の考慮事項
+
+#### 4.1 バンドルサイズの最適化
+
+- Shared 層の UI コンポーネントは個別にインデックスファイルを作成
+- 大規模プロジェクトではモノレポ構成の検討
+
+#### 4.2 循環参照の防止
+
+- 同一スライス内: 相対パスでの完全パスインポートを使用
+- 異なるスライス間: エイリアスを使用した絶対パスインポート
+
+#### 4.3 開発効率の維持
+
+- セグメント内でのワイルドカードエクスポートを避ける
+- スライス内の構造変更は自由に可能
+- パブリック API の変更は慎重に行う
+
+### 5. パブリック API の実装ベストプラクティス
+
+#### 5.1 循環インポートの防止方法
+
+1. 同一スライス内のインポート
+
+   ```js
+   // 良い例：完全な相対パスを使用
+   import { loadUserStatistics } from "./api/loadUserStatistics";
+
+   // 悪い例：インデックスファイルからのインポート
+   import { loadUserStatistics } from "../"; // 循環参照の可能性あり
+   ```
+
+2. 異なるスライス間のインポート
+   - エイリアスを使用した絶対パスを常に使用
+   ```js
+   // 良い例
+   import { Button } from "@/shared/ui/button";
+   import { TextField } from "@/shared/ui/text-field";
+   ```
+
+#### 5.2 Shared 層での最適化
+
+大規模プロジェクトでの推奨構造：
+
+```
+📂 shared/ui/
+  📂 button
+    📄 index.ts
+  📂 text-field
+    📄 index.ts
+  📂 carousel
+    📄 index.ts
+```
+
+以下の場合は個別のインデックスファイルを作成：
+
+- UI コンポーネントライブラリ
+- 重い依存関係を持つコンポーネント
+- 独立した機能を持つユーティリティ
+
+#### 5.3 大規模プロジェクトでのパフォーマンス最適化
+
+1. セグメント内での不要なインデックスファイルを避ける
+
+   - スライスのルートインデックスファイルのみを維持
+   - 例：`features/comments/index.ts`は必要だが、`features/comments/ui/index.ts`は不要
+
+2. モノレポアプローチ
+
+   - 大規模アプリケーションを機能単位で分割
+   - 各パッケージで必要なレイヤーのみを実装
+   - 共通の Shared レイヤーの共有も可能
+
+3. パブリック API の設計原則
+   - スライスの構造変更から他のコードを保護
+   - 破壊的な変更は必ずパブリック API の変更を伴うようにする
+   - 必要な部分のみを公開
+
+### ファイル構成 (File Structure)
+
+```
+labor-frontend/
+├── app/                        # アプリケーションコンポーネントとルート
+│   ├── root.tsx                # ルートアプリケーションコンポーネントとプロバイダー
+│   ├── home.tsx                # ホームページコンポーネント
+│   ├── protected-route-guard.tsx  # 認証保護
+│   └── routes.ts               # ルート設定
+├── src/                        # Feature Sliced Architectureに基づくソースコード
+│   ├── pages/                  # 機能ごとのページコンポーネント
+│   │   └── employee/           # 従業員関連の機能
+│   │       └── basic-info2/    # 基本情報2の機能
+│   │           ├── model/      # データモデルとバリデーション
+│   │           └── ui/         # UIコンポーネント
+│   └── shared/                 # 共有リソース
+│       ├── assets/             # 静的アセット（画像など）
+│       ├── lib/                # ユーティリティ関数やカスタムフック
+│       └── ui/                 # 共有UIコンポーネント
+├── docs/                       # ドキュメント
+├── .github/                    # GitHub関連の設定（CI/CDなど）
+├── .husky/                     # Huskyの設定（Git hooks）
+└── .storybook/                 # Storybookの設定
+```
+
+### ファイル命名パターン (File Naming Patterns)
+
+- コンポーネントファイル: `component-name.tsx`
+- ビューコンポーネント: `component-name.view.tsx`
+- コンテナコンポーネント: `component-name.container.tsx`
+- Storybook ファイル: `component-name.stories.tsx`
+- テストファイル: `component-name.test.ts` または `component-name.test.tsx`
+- モデル/スキーマファイル: `model-name-schema.ts`
+- インデックスファイル: `index.ts`
+- 定数ファイル: `const.ts`
+- 型定義ファイル: `type.ts`
+
+## コーディング規約 (Coding Conventions)
+
+### 命名規則 (Naming Conventions)
+
+#### ファイル名 (File Names)
+
+- すべてのファイル名とディレクトリ名はケバブケース（kebab-case）を使用する
+- `.ls-lint.yml`で定義された命名規則に従う
+
+```yaml
+ls:
+  src:
+    .dir: kebab-case
+    .ts: kebab-case
+    .test.ts: kebab-case
+    .tsx: kebab-case
+    .view.tsx: kebab-case
+    .container.tsx: kebab-case
+    .stories.tsx: kebab-case
+    .view.stories.tsx: kebab-case
+    .container.stories.tsx: kebab-case
+
+  app:
+    .dir: kebab-case
+    .tsx: kebab-case
+    .client.tsx: kebab-case
+    .ts: kebab-case
+```
+
+#### 変数名 (Variable Names)
+
+- 変数名はキャメルケース（camelCase）を使用する
+- 定数は大文字のスネークケース（SNAKE_CASE）を使用する（例: `ACCEPT_TYPE`）
+- 型名とインターフェース名はパスカルケース（PascalCase）を使用する
+- Boolean の変数名は`is`、`has`、`should`などのプレフィックスを使用する（例: `isVisible`, `isForeigner`）
+
+#### コンポーネント名 (Component Names)
+
+- React コンポーネント名はパスカルケース（PascalCase）を使用する
+- コンポーネントのプロパティ型は`ComponentNameProps`の形式で定義する（例: `FieldWrapperProps`, `AppShellProps`）
+
+### 型定義 (Type Definitions)
+
+#### 型の使用 (Type Usage)
+
+- 厳格な型チェックを有効にする（`tsconfig.json`の`strict: true`）
+- `any`型の使用を避ける
+- 適切な場合は型推論を活用する
+- 複雑なオブジェクトには明示的な型定義を使用する
+- 定数オブジェクトには`as const`を使用して型を固定する
+
+```tsx
+// 定数オブジェクトの例
+const LayoutSize = {
+  headerHeight: 61,
+  footerHeight: 72,
+  sidebarWidth: 55,
+} as const;
+```
+
+#### ユーティリティ関数と型定義の分離 (Separation of Utility Functions and Type Definitions)
+
+ユーティリティ関数と型定義は別々のファイルに分離します：
+
+- 型定義は `type.ts` ファイルに配置
+- ユーティリティ関数は `utils.ts` ファイルに配置
+- 定数は `const.ts` ファイルに配置
+
+これにより、コードの整理が容易になり、関心の分離が促進されます。
+
+```tsx
+// Good - type.ts
+export type UserData = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+// Good - utils.ts
+export function createDefaultUser(): UserData {
+  return {
+    id: "",
+    name: "",
+    email: "",
+  };
+}
+
+// Bad - 型定義とユーティリティ関数が混在
+export type UserData = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export function createDefaultUser(): UserData {
+  return {
+    id: "",
+    name: "",
+    email: "",
+  };
+}
+```
+
+#### Zod スキーマ (Zod Schema)
+
+- フォームバリデーションには Zod スキーマを使用する
+- スキーマは`.ts`ファイルで定義し、`.test.ts`ファイルでテストする
+- エラーメッセージは日本語で記述する
+
+```tsx
+// Zodスキーマの例
+const userSchema = z.object({
+  name: z.string().min(1, "必須項目です"),
+  email: z.string().email("有効なメールアドレスを入力してください"),
+});
+
+type User = z.infer<typeof userSchema>;
+```
+
+### インポート/エクスポート (Imports/Exports)
+
+#### インポート順序 (Import Order)
+
+1. 外部ライブラリ（React、サードパーティライブラリ）
+2. 内部モジュール（相対パスを使用）
+3. 型のインポート（`import type`を使用）
+4. アセット（画像、スタイルなど）
+
+```tsx
+// 外部ライブラリ
+import { Box, Button } from "@worx-hr/design-system";
+import { useForm } from "@conform-to/react";
+
+// 内部モジュール
+import { useAuth } from "~/shared/hooks/use-auth";
+import { AppShell } from "~/shared/ui/app-shell";
+
+// 型のインポート
+import type { User } from "~/shared/types";
+
+// アセット
+import { logo } from "~/shared/assets";
+```
+
+#### エクスポート (Exports)
+
+- 名前付きエクスポートを優先する
+- インデックスファイル（`index.ts`）を使用して関連コンポーネントをまとめる
+- デフォルトエクスポートはアセットやページコンポーネントに限定する
+
+```tsx
+// 名前付きエクスポート
+export function Component() {
+  /* ... */
+}
+export type ComponentProps = {
+  /* ... */
+};
+
+// インデックスファイルの例
+export { Component } from "./component";
+export type { ComponentProps } from "./component";
+```
+
+### コメント規約 (Comment Conventions)
+
+コードベース内のすべてのコメントは日本語で記述します。これには以下が含まれます：
+
+- 関数やメソッドのドキュメンテーションコメント
+- インラインコメント
+- 型定義のコメント
+- ユーティリティファイルのドキュメンテーション
+
+```tsx
+// Good
+/**
+ * ユーザーデータを取得する関数
+ * @param userId ユーザーID
+ * @returns ユーザー情報
+ */
+function fetchUserData(userId: string) {
+  // ユーザーIDが空の場合はエラーを投げる
+  if (!userId) throw new Error("ユーザーIDは必須です");
+  return api.get(`/users/${userId}`);
+}
+
+// Bad
+/**
+ * Function to fetch user data
+ * @param userId User ID
+ * @returns User information
+ */
+function fetchUserData(userId: string) {
+  // Throw error if userId is empty
+  if (!userId) throw new Error("User ID is required");
+  return api.get(`/users/${userId}`);
+}
+```
+
+### SLAP 原則 (Single Level of Abstraction Principle)
+
+```typescript
+// Good
+const UserProfile = () => {
+  const userData = useUserData();
+  return <UserProfileLayout userData={userData} />;
+};
+
+// Bad
+const UserProfile = () => {
+  const [data, setData] = useState();
+  useEffect(() => {
+    fetch("/api/user")
+      .then((res) => res.json())
+      .then(setData);
+  }, []);
+  return <div>{/* 複雑なJSXの入れ子 */}</div>;
+};
+```
+
+### 認知的複雑度を下げる (Reduce Cognitive Complexity)
+
+#### 1. 基本ルール
+
+```ts
+// ❌ 避けるべき: 深いネストと複数の条件分岐
+function complexFunction() {
+  for (let i = 0; i < 10; i++) {
+    if (condition1) {
+      for (let j = 0; j < 10; j++) {
+        if (condition2) {
+          // 複雑度が高くなる
+        }
+      }
+    }
+  }
+}
+
+// ✅ 推奨: 関数の分割と早期リターン
+function betterFunction() {
+  if (!condition1) return;
+
+  const results = processFirstLevel();
+  if (!results.length) return;
+
+  return processSecondLevel(results);
+}
+```
+
+#### 2. 複雑度を下げるた具体的なルール
+
+```ts
+// 1. 早期リターンパターン
+function handleUser(user) {
+  // ❌ 避けるべき
+  if (user) {
+    if (user.isActive) {
+      // 処理
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+
+  // ✅ 推奨
+  if (!user) return null;
+  if (!user.isActive) return null;
+  // 処理
+}
+
+// 2. 条件式の抽出
+function validateUser(user) {
+  // ❌ 避けるべき
+  if (user.age >= 18 && user.isActive && !user.isBanned && user.emailVerified) {
+    // 処理
+  }
+
+  // ✅ 推奨
+  const isValidAge = user.age >= 18;
+  const isEligible = user.isActive && !user.isBanned;
+  const hasVerifiedEmail = user.emailVerified;
+
+  if (isValidAge && isEligible && hasVerifiedEmail) {
+    // 処理
+  }
+}
+
+// 3. ループ処理の分割
+function processItems(items) {
+  // ❌ 避けるべき
+  for (const item of items) {
+    if (item.type === "special") {
+      for (const detail of item.details) {
+        if (detail.status === "active") {
+          // 処理
+        }
+      }
+    }
+  }
+
+  // ✅ 推奨
+  const specialItems = items.filter((item) => item.type === "special");
+  const activeDetails = specialItems.flatMap((item) =>
+    item.details.filter((detail) => detail.status === "active")
+  );
+  processActiveDetails(activeDetails);
+}
+```
+
+#### 3. チェックリスト
+
+- 関数の長さ
+  - 1 関数あたり 30 行以内を目標とする
+  - 長い関数は小さな関数に分割する
+- ネストの深さ
+  - 最大 3 レベルまでに制限
+  - それ以上深くなる場合は関数の抽出を検討
+- 条件分岐
+  - 複雑な条件は意味のある変数名に抽出
+  - switch 文の代わりにオブジェクトマッピングの使用を検討
+- ループ処理
+  - 配列メソッド（map, filter, reduce 等）の活用
+  - ネストされたループは避ける
+
+## コンポーネント開発 (Component Development)
+
+### コンポーネント設計 (Component Design)
+
+#### コンポーネント構造 (Component Structure)
+
+- 関数コンポーネントを使用する
+- 複雑なコンポーネントは、ビュー（.view.tsx）とコンテナ（.container.tsx）に分離する
+
+```tsx
+// 基本的なコンポーネント構造
+export interface ComponentProps {
+  // プロパティの定義
+}
+
+export function Component(props: ComponentProps) {
+  // コンポーネントの実装
+  return (
+    // JSX
+  );
+}
+```
+
+### プレゼンテーション/コンテナパターン (Presentational/Container Pattern)
+
+コンポーネントをロジックとプレゼンテーションに分離します。
+
+```tsx
+// Container Component (features/user-profile/user-profile.container.tsx)
+export const UserProfileContainer = () => {
+  const [userData, setUserData] = useState<UserData>();
+
+  useEffect(() => {
+    fetchUserData().then(setUserData);
+  }, []);
+
+  return <UserProfilePresentation userData={userData} />;
+};
+
+// Presentational Component (features/user-profile/user-profile.view.tsx)
+interface Props {
+  userData?: UserData;
+}
+
+export const UserProfilePresentation = ({ userData }: Props) => (
+  <div>
+    <h1>{userData?.name}</h1>
+    <p>{userData?.email}</p>
+  </div>
+);
+```
+
+### プロップスの扱い (Props Handling)
+
+- プロップスはインターフェースで定義する
+- 必須プロップスと任意プロップスを明確に区別する（任意プロップスには`?`を使用）
+- 子要素を受け取るコンポーネントには`PropsWithChildren`を使用する
+
+```tsx
+interface ComponentProps extends PropsWithChildren {
+  id: string; // 必須プロップス
+  description?: string; // 任意プロップス
+}
+```
+
+#### Props の分割代入
+
+Props は必ず分割代入を使用し、型安全性とコードの可読性を向上させます。
+
+```tsx
+// Good
+const UserCard = ({ name, email, age }: UserCardProps) => {
+  return (
+    <div>
+      <h2>{name}</h2>
+      <p>{email}</p>
+      <span>{age}</span>
+    </div>
+  );
+};
+
+// Good - 複数行の場合
+const UserCard = (props: UserCardProps) => {
+  const {
+    name,
+    email,
+    age,
+    // 多くのpropsがある場合はこちらの書き方も可
+  } = props;
+
+  return (
+    <div>
+      <h2>{name}</h2>
+      <p>{email}</p>
+      <span>{age}</span>
+    </div>
+  );
+};
+
+// Bad
+const UserCard = (props: UserCardProps) => {
+  return (
+    <div>
+      <h2>{props.name}</h2>
+      <p>{props.email}</p>
+      <span>{props.age}</span>
+    </div>
+  );
+};
+```
+
+### コンポーネント定義方法 (Component Definition)
+
+コンポーネントは関数宣言で統一します。これにより、コードベース全体での一貫性が保たれ、可読性が向上します。
+
+```tsx
+// Good
+function UserProfile({ name, email }: UserProfileProps) {
+  return (
+    <div>
+      <h1>{name}</h1>
+      <p>{email}</p>
+    </div>
+  );
+}
+
+// Bad - 関数式
+const UserProfile = function ({ name, email }: UserProfileProps) {
+  return (
+    <div>
+      <h1>{name}</h1>
+      <p>{email}</p>
+    </div>
+  );
+};
+
+// Bad - アロー関数
+const UserProfile = ({ name, email }: UserProfileProps) => {
+  return (
+    <div>
+      <h1>{name}</h1>
+      <p>{email}</p>
+    </div>
+  );
+};
+```
+
+関数宣言を使用する利点：
+
+- 関数のホイスティングにより、定義前でも使用可能
+- コードの見通しが良くなる
+- デバッグ時にスタックトレースが分かりやすい
+- TypeScript での型推論が明確
+
+### フックの使用 (Hooks Usage)
+
+- カスタムフックは`use`プレフィックスを使用する（例: `useMultipleFileUpload`）
+- フックは単一責任の原則に従う
+- 複雑なロジックはカスタムフックに抽出する
+
+```tsx
+// カスタムフックの例
+function useMultipleFileUpload(initialFiles: UploadFile[]) {
+  // フックの実装
+  return {
+    // 返り値
+  };
+}
+```
+
+### UI Stack に基づいた状態設計 (UI State Design Based on UI Stack)
+
+UI の設計において、以下の 5 つの状態（UI Stack）を考慮することで、ユーザーにとって使いやすく、状態の変化に強い UI を実現します。
+
+#### 1. Ideal State（理想状態）
+
+すべてのコンテンツが適切に表示される理想的な状態です。
+
+```tsx
+function UserProfile({ user }: UserProfileProps) {
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+      <img src={user.avatar} alt={user.name} />
+    </div>
+  );
+}
+```
+
+#### 2. Empty State（空状態）
+
+コンテンツが存在しない状態です。ユーザーに対して何をすべきかを示すメッセージやアクションを提供します。
+
+```tsx
+function UserList({ users }: UserListProps) {
+  if (users.length === 0) {
+    return (
+      <EmptyState
+        message="ユーザーが登録されていません"
+        action={<Button>ユーザーを追加</Button>}
+      />
+    );
+  }
+  return <UserListContent users={users} />;
+}
+```
+
+#### 3. Loading State（読み込み状態）
+
+データを読み込み中の状態です。React の Suspense 機能を活用し、宣言的にローディング状態を扱います。
+
+```tsx
+// 基本的な Suspense の使用例
+function UserProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <Skeleton>
+          <div className="avatar-placeholder" />
+          <div className="name-placeholder" />
+          <div className="email-placeholder" />
+        </Skeleton>
+      }
+    >
+      <UserProfile />
+    </Suspense>
+  );
+}
+
+// 複数のコンポーネントで Suspense を使用する例
+function DashboardPage() {
+  return (
+    <div>
+      <Suspense fallback={<HeaderSkeleton />}>
+        <Header />
+      </Suspense>
+
+      <div className="content">
+        <Suspense fallback={<SidebarSkeleton />}>
+          <Sidebar />
+        </Suspense>
+
+        <Suspense fallback={<MainContentSkeleton />}>
+          <MainContent />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+// データフェッチングと組み合わせた例
+function UserProfile() {
+  const user = use(fetchUser()); // fetchUserはPromiseを返す関数
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+      <img src={user.avatar} alt={user.name} />
+    </div>
+  );
+}
+
+// エラーバウンダリと組み合わせた例
+function UserProfileWithErrorBoundary() {
+  return (
+    <ErrorBoundary fallback={<ErrorState />}>
+      <Suspense fallback={<ProfileSkeleton />}>
+        <UserProfile />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+```
+
+#### 4. Error State（エラー状態）
+
+エラーが発生した状態です。エラーメッセージやリトライアクションを提供します。
+
+```tsx
+function UserProfile({ userId }: UserProfileProps) {
+  const { data, error } = useUserData(userId);
+
+  if (error) {
+    return (
+      <ErrorState
+        message="データの取得に失敗しました"
+        action={<Button onClick={retry}>リトライ</Button>}
+      />
+    );
+  }
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.email}</p>
+    </div>
+  );
+}
+```
+
+#### 5. Partial State（部分状態）
+
+部分的にデータが存在する状態です。必要な情報が不足している場合は、適切なメッセージやアクションを提供します。
+
+```tsx
+function UserProfile({ user }: UserProfileProps) {
+  if (!user) {
+    return <LoadingState message="ユーザーデータを読み込み中..." />;
+  }
+
+  if (!user.email) {
+    return (
+      <PartialState
+        message="メールアドレスが未登録です"
+        action={<Button>メールアドレスを追加</Button>}
+      />
+    );
+  }
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+```
+
+### エラーハンドリング (Error Handling)
+
+エラー状態の表示には一貫したパターンを使用します：
+
+- フィールドエラーは直接関連するフィールドの下に表示
+- フォームエラーはフォームの上部または送信ボタンの上に表示
+- エラーメッセージは常に日本語で記述
+- エラー状態の UI コンポーネントには赤色（`defaultTheme.color.semantics.alert`）を使用
+
+```tsx
+// Good
+{
+  fieldError && (
+    <div style={{ color: "red", marginTop: "4px" }}>{fieldError.message}</div>
+  );
+}
+
+// Bad - インラインスタイルを使用
+{
+  fieldError ? (
+    <Box marginTop="4px">
+      <P color={defaultTheme.color.semantics.alert}>{fieldError.message}</P>
+    </Box>
+  ) : null;
+}
+```
+
+### コンポーネント抽象化レベル (Component Abstraction Levels)
+
+コンポーネントは以下の抽象化レベルで分類します：
+
+1. **基本コンポーネント (Atomic Components)**
+
+   - 最小単位の UI コンポーネント
+   - 特定のビジネスロジックを持たない
+   - 高い再利用性を持つ
+
+   ```typescript
+   // shared/ui/pill/pill.tsx
+   export function Pill({ label, color }: PillProps) {
+     return <Box color={color}>{label}</Box>;
+   }
+   ```
+
+2. **複合コンポーネント (Composite Components)**
+
+   - 基本コンポーネントを組み合わせたコンポーネント
+   - 限定的なビジネスロジックを含む場合がある
+   - 特定のユースケースに特化した機能を持つ
+
+   ```typescript
+   // shared/ui/upload-label-with-info/upload-label-with-info.tsx
+   export function UploadLabelWithInfo({ label, error }: Props) {
+     return (
+       <Box>
+         <Pill label={label} />
+         {error && <ErrorMessage message={error} />}
+       </Box>
+     );
+   }
+   ```
+
+3. **機能コンポーネント (Feature Components)**
+   - 特定の機能を実現するためのコンポーネント
+   - ビジネスロジックと UI の統合
+   - 再利用性は低いが、機能の独立性が高い
+   ```typescript
+   // pages/employee/basic-info2/ui/basic-info-form.tsx
+   export function BasicInfoForm() {
+     return (
+       <Form>
+         <FileInput />
+         <UploadLabelWithInfo />
+       </Form>
+     );
+   }
+   ```
+
+## 状態管理 (State Management)
+
+### ローカル状態 (Local State)
+
+- コンポーネントのローカル状態には`useState`と`useReducer`を使用する
+- 複雑な状態ロジックは`useReducer`を使用する
+- 状態の更新は不変性を保持する
+
+### フォーム状態 (Form State)
+
+- フォーム状態の管理には`@conform-to/react`を使用する
+- バリデーションには`@conform-to/zod`と`zod`を使用する
+- フォームの送信処理は非同期で行う
+
+```tsx
+// フォーム状態の例
+const [form, fields] = useForm({
+  defaultValue: {
+    // デフォルト値
+  },
+  shouldValidate: "onBlur",
+  shouldRevalidate: "onInput",
+  onValidate({ formData }) {
+    return parseWithZod(formData, { schema: formSchema });
+  },
+});
+```
+
+#### 条件分岐の扱い
+
+```tsx
+// Good
+<div style={{ display: isVisible ? "block" : "none" }}>
+  <FormContent />
+</div>;
+
+// Bad
+{
+  isVisible && <FormContent />;
+}
+```
+
+### グローバル状態 (Global State)
+
+- 認証状態には`@worx-hr/react-auth`を使用する
+- コンテキスト API を使用して必要に応じてグローバル状態を管理する
+- 状態の更新は不変性を保持する
+
+## データ連携 (Data Integration)
+
+### GraphQL の利用 (GraphQL Usage)
+
+#### スキーマ (Schema)
+
+- GraphQL スキーマは`schema.graphql`ファイルで定義する
+- コードジェネレーションには`@graphql-codegen`を使用する
+- 型定義は自動生成されたものを使用する
+
+#### クエリとミューテーション (Queries and Mutations)
+
+- クエリとミューテーションは`.graphql`ファイルで定義する
+- 生成された型と関数を使用して GraphQL を操作する
+- エラーハンドリングを適切に行う
+
+```tsx
+// GraphQLの使用例
+const { data, loading, error } = useQuery(GET_USER_QUERY, {
+  variables: { id: userId },
+});
+```
+
+### API との連携 (API Integration)
+
+#### MSW による API モック
+
+```tsx
+// handlers.ts
+http.get("/api/user", () => {
+  return HttpResponse.json({
+    name: "John Doe",
+    email: "john@example.com",
+  });
+});
+```
+
+## スタイリング (Styling)
+
+### デザインシステム (Design System)
+
+- `@worx-hr/design-system`を使用して UI コンポーネントを構築する
+- デザインシステムのコンポーネントとプロパティを優先的に使用する
+- デザインシステムの色やサイズを直接使用する（例: `defaultTheme.colors.primary`）
+
+```tsx
+import { Box, Button, P } from "@worx-hr/design-system";
+
+function Component() {
+  return (
+    <Box display="flex" gap="8px">
+      <P>テキスト</P>
+      <Button variant="primary">ボタン</Button>
+    </Box>
+  );
+}
+```
+
+### スタイルの適用 (Applying Styles)
+
+- インラインスタイルの使用を避ける
+- デザインシステムのプロパティを使用してスタイルを適用する
+- 必要に応じて`styled-components`を使用する
+
+## テスト (Testing)
+
+### テスト構造 (Test Structure)
+
+- UI コンポーネントは Storybook play function を使用してテストする
+- その他は Vitest を使用してテストを記述する
+- テストファイルは`.test.ts`または`.test.tsx`の拡張子を使用する
+- `describe`と`it`を使用してテストをグループ化する
+- テスト説明は日本語で記述する
+
+### AAA パターン (Arrange-Act-Assert)
+
+テストは「Arrange（準備）」「Act（実行）」「Assert（検証）」の 3 つのステップで構成します。
+
+```tsx
+describe("user-profile", () => {
+  it("displays user data correctly", () => {
+    // Arrange
+    const userData = { name: "John Doe", email: "john@example.com" };
+
+    // Act
+    render(<UserProfilePresentation userData={userData} />);
+
+    // Assert
+    expect(screen.getByText("John Doe")).toBeInTheDocument();
+  });
+});
+```
+
+### Storybook の活用 (Storybook Usage)
+
+- コンポーネントの Story を作成する（`.stories.tsx`）
+- 異なる状態やバリエーションを Story として定義する
+- インタラクションテストを含める
+- Story のメタデータには`tags: ["autodocs"]`を含める
+
+```tsx
+// Storybookの例
+const meta: Meta<typeof Component> = {
+  component: Component,
+  parameters: {
+    layout: "centered",
+  },
+  args: {
+    // デフォルトのプロップス
+  },
+  tags: ["autodocs"],
+};
+
+export default meta;
+type Story = StoryObj<typeof Component>;
+
+export const Default: Story = {
+  args: {
+    // Storyのプロップス
+  },
+};
+
+export const WithError: Story = {
+  args: {
+    // エラー状態のプロップス
+  },
+};
+```
+
+### UI 状態のテスト (UI State Testing with Storybook)
+
+Storybook の play function を活用して、各 UI 状態のインタラクションテストを実装します。
+
+#### 基本的な Storybook 構成
+
+```tsx
+// UserProfile.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import { within, userEvent, waitFor } from "@storybook/testing-library";
+import { expect } from "@storybook/jest";
+import { UserProfile } from "./UserProfile";
+
+const meta: Meta<typeof UserProfile> = {
+  component: UserProfile,
+  tags: ["autodocs"],
+};
+
+export default meta;
+type Story = StoryObj<typeof UserProfile>;
+```
+
+#### Ideal State のテスト
+
+```tsx
+export const IdealState: Story = {
+  args: {
+    user: {
+      name: "John Doe",
+      email: "john@example.com",
+      avatar: "avatar.jpg",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 要素が正しく表示されていることを確認
+    await expect(canvas.getByText("John Doe")).toBeInTheDocument();
+    await expect(canvas.getByText("john@example.com")).toBeInTheDocument();
+    await expect(canvas.getByAltText("John Doe")).toHaveAttribute(
+      "src",
+      "avatar.jpg"
+    );
+  },
+};
+```
+
+#### Empty State のテスト
+
+```tsx
+export const EmptyState: Story = {
+  args: {
+    users: [],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Empty stateのメッセージを確認
+    await expect(
+      canvas.getByText("ユーザーが登録されていません")
+    ).toBeInTheDocument();
+
+    // ボタンのインタラクションをテスト
+    const addButton = canvas.getByRole("button", { name: "ユーザーを追加" });
+    await expect(addButton).toBeInTheDocument();
+    await userEvent.click(addButton);
+  },
+};
+```
+
+#### Loading State のテスト
+
+```tsx
+export const LoadingState: Story = {
+  parameters: {
+    suspense: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // スケルトンローダーの確認
+    await expect(canvas.getByTestId("skeleton-loader")).toBeInTheDocument();
+
+    // データロード完了後の表示を確認
+    await waitFor(async () => {
+      await expect(canvas.getByText("John Doe")).toBeInTheDocument();
+    });
+  },
+};
+```
+
+#### Error State のテスト
+
+```tsx
+export const ErrorState: Story = {
+  args: {
+    error: new Error("Failed to fetch user data"),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // エラーメッセージの確認
+    await expect(
+      canvas.getByText("ユーザー情報の取得に失敗しました")
+    ).toBeInTheDocument();
+
+    // リトライボタンのインタラクション
+    const retryButton = canvas.getByRole("button", { name: "再試行" });
+    await userEvent.click(retryButton);
+  },
+};
+```
+
+#### Partial State のテスト
+
+```tsx
+export const PartialState: Story = {
+  args: {
+    user: {
+      name: "John Doe",
+      email: "",
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // メールアドレスが未登録のメッセージを確認
+    await expect(
+      canvas.getByText("メールアドレスが未登録です")
+    ).toBeInTheDocument();
+
+    // メールアドレス追加ボタンのインタラクション
+    const addEmailButton = canvas.getByRole("button", {
+      name: "メールアドレスを追加",
+    });
+    await userEvent.click(addEmailButton);
+  },
+};
+```
+
+### テストライブラリ (Testing Library)
+
+- `@storybook/test` を使用して Storybook のテストを記述する
+
+### MSW によるモック (MSW Mocking)
+
+```tsx
+// handlers.ts
+http.get("/api/user", () => {
+  return HttpResponse.json({
+    name: "John Doe",
+    email: "john@example.com",
+  });
+});
+```
+
+### テストクエリの優先順位
+
+#### 1. クエリタイプの選択ルール
+
+```ts
+// ✅ 推奨: 要素が必ず存在すべき場合
+getBy... // または getAllBy...
+const submitButton = screen.getByRole('button', { name: /submit/i });
+
+// ✅ 推奨: 要素の非存在を確認する場合
+queryBy... // または queryAllBy...
+expect(screen.queryByText('エラーメッセージ')).not.toBeInTheDocument();
+
+// ✅ 推奨: 非同期で表示される要素を待機する場合
+findBy... // または findAllBy...
+const successMessage = await screen.findByText('送信完了');
+```
+
+#### 2. クエリメソッドの優先順位ルール
+
+```ts
+// 1️⃣ 最優先: アクセシビリティを考慮したクエリ
+// ✅ ボタン、フォーム要素、ランドマークなどの操作可能な要素
+const button = screen.getByRole("button", { name: "送信" });
+
+// ✅ フォームフィールド
+const emailInput = screen.getByLabelText("メールアドレス");
+
+// ✅ テキストコンテンツ
+const heading = screen.getByText("ようこそ");
+
+// 2️⃣ 次点: セマンティッククエリ
+// ✅ 画像や図の場合
+const logo = screen.getByAltText("会社ロゴ");
+
+// 3️⃣ 最終手段: テストID
+// ⚠️ 他の方法が使えない場合のみ使用
+const dynamicElement = screen.getByTestId("user-profile");
+```
+
+#### 3. アンチパターン
+
+```ts
+// ❌ 避けるべき: クラス名による選択
+container.querySelector(".submit-button");
+
+// ❌ 避けるべき: ID による選択
+container.querySelector("#submit-button");
+
+// ❌ 避けるべき: 不適切なテストIDの過剰使用
+screen.getByTestId("simple-button"); // roleで十分な場合
+```
+
+#### 4. ベストプラクティス
+
+```ts
+// ✅ 推奨: 明確な役割と名前による選択
+const submitButton = screen.getByRole("button", { name: /送信/i });
+
+// ✅ 推奨: フォーム要素はラベルで選択
+const passwordInput = screen.getByLabelText("パスワード");
+
+// ✅ 推奨: 非同期処理の適切な待機
+const notification = await screen.findByRole("alert");
+
+// ✅ 推奨: 複数要素の取得が必要な場合
+const listItems = screen.getAllByRole("listitem");
+```
+
+### テストカバレッジ要件 (Test Coverage Requirements)
+
+- ステートメントカバレッジ: 80%以上
+- ブランチカバレッジ: 80%以上
+- 関数カバレッジ: 70%以上
+
+## 品質管理 (Quality Assurance)
+
+### リンティング (Linting)
+
+#### Biome
+
+- Biome を使用してコードのリンティングとフォーマットを行う
+- `biome.json`の設定に従う
+- 推奨ルールを適用する
+- 未使用のインポート、変数、関数パラメータは警告レベルで検出する
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "error"
+      },
+      "style": {
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### ファイル名リンティング (Filename Linting)
+
+- `ls-lint`を使用してファイル名の命名規則を強制する
+- `.ls-lint.yml`の設定に従う
+- ファイル名はケバブケース（kebab-case）を使用する
+
+### フォーマット (Formatting)
+
+- Biome を使用してコードのフォーマットを行う
+- `biome.json`の設定に従う
+
+### Git Hooks
+
+- Husky を使用して Git hooks を設定する
+- コミット前にリンティングとフォーマットを実行する
+- `lint-staged`を使用して変更されたファイルのみをチェックする
+
+```json
+// package.jsonの設定
+"lint-staged": {
+  "*.{ts,tsx}": [
+    "biome check --write",
+    "ls-lint"
+  ]
+}
+```
+
+## アクセシビリティ (Accessibility)
+
+- ARIA 属性の適切な使用
+- キーボード操作のサポート
+- 適切な HTML 要素の使用
+
+```typescript
+// Good
+<button aria-label="Close modal" onClick={onClose}>
+  <span className="icon">×</span>
+</button>
+
+// Bad
+<div onClick={onClose}>×</div>
+```
+
+## 共通リソース管理 (Common Resources)
+
+### ディレクトリ構造 (Directory Structure)
+
+共通リソースは以下のような構造で配置します：
+
+```
+shared/
+├── lib/            # 共通のロジック、型定義、定数
+│   └── file/      # 機能ごとの共通定義
+│       ├── const.ts   # 定数（ACCEPT_TYPEなど）
+│       ├── type.ts    # 型定義（UploadFile、FileSizeErrorなど）
+│       └── index.ts   # エクスポート
+└── ui/            # 共通のUIコンポーネント
+    ├── basic/     # 基本的なUIコンポーネント（Pillなど）
+    └── composed/  # 複合的なUIコンポーネント（UploadLabelWithInfoなど）
+```
+
+### リソースの分類 (Resource Classification)
+
+1. **共通ロジック（shared/lib）**
+
+   - 型定義：再利用可能な型定義（`type.ts`）
+   - 定数：共通で使用する定数（`const.ts`）
+   - ユーティリティ：共通で使用する関数（`utils.ts`）
+
+   ```typescript
+   // shared/lib/file/type.ts
+   export type UploadFile = ExistingFile | NewFile;
+
+   // shared/lib/file/const.ts
+   export const ACCEPT_TYPE = {
+     PNG: { mimeType: "image/png" },
+   } as const;
+   ```
+
+2. **共通 UI コンポーネント（shared/ui）**
+
+   - 基本コンポーネント：独立した再利用可能な UI 要素
+   - 複合コンポーネント：基本コンポーネントを組み合わせたもの
+
+   ```typescript
+   // shared/ui/pill/pill.tsx
+   export function Pill({ label, leftIcon }: PillProps) {
+     // 基本的なUI実装
+   }
+
+   // shared/ui/upload-label-with-info/upload-label-with-info.tsx
+   export function UploadLabelWithInfo({ label, error }: Props) {
+     // Pillを使用した複合コンポーネント
+   }
+   ```
+
+### リファクタリングガイドライン (Refactoring Guidelines)
+
+1. **共通コードの抽出**
+
+   - 複数の場所で使用される型定義は`shared/lib/{機能名}/type.ts`に配置
+   - 共通の UI コンポーネントは`shared/ui`に配置
+   - 基本的な UI コンポーネントと複合コンポーネントを適切に分離
+
+2. **依存関係の管理**
+
+   ```typescript
+   // Good - 適切な依存関係
+   import type { UploadFile } from "~/shared/lib/file";
+   import { Pill } from "~/shared/ui/pill";
+
+   // Bad - 循環参照
+   import { UploadFile } from "~/shared/ui/file-input";
+   ```
+
+3. **コンポーネントの分割基準**
+
+   - 単一責任の原則に従う
+   - 再利用可能性を考慮
+   - UI とロジックの適切な分離
+
+4. **インターフェースの設計**
+
+- インターフェースは明確で再利用可能なものにする
+
+```typescript
+// Good - 明確で再利用可能なインターフェース
+export interface PillProps {
+  label: string;
+  leftIcon?: ReactNode;
+  color?: string;
+}
+
+// Bad - 具体的すぎて再利用が難しいインターフェース
+export interface FileUploadPillProps {
+  fileName: string;
+  fileSize: number;
+  fileIcon: ReactNodej;
+}
+```
+
+- イベントハンドラーは必ず 'on' で始める
+
+```typescript
+// Good - イベントハンドラー
+export interface ButtonProps {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+// Bad - イベントハンドラー
+export interface ButtonProps {
+  clickHandler: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  handleClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+// Good
+export interface RadioProps {
+  onChange: (value: string) => void;
+}
+
+// Bad
+export interface RadioProps {
+  setValue: (value: string) => void;
+}
+```
+
+### エクスポートパターン (Export Patterns)
+
+1. **型定義のエクスポート**
+
+   ```typescript
+   // shared/lib/file/index.ts
+   export { ACCEPT_TYPE } from "./const";
+   export type {
+     AcceptType,
+     UploadFile,
+     ExistingFile,
+     NewFile,
+     FileSizeError,
+   } from "./type";
+   ```
+
+2. **コンポーネントのエクスポート**
+   ```typescript
+   // shared/ui/pill/index.ts
+   export { Pill } from "./pill";
+   export type { PillProps } from "./pill";
+   ```
+
+これにより、以下の利点が得られます：
+
+- コードの重複を防ぐ
+- メンテナンス性の向上
+- 一貫性のある実装
+- 再利用性の促進
+
+## フォーム実装の高度なパターン (Advanced Form Patterns)
+
+### 条件付きフォームフィールド (Conditional Form Fields)
+
+フォームの構造が条件に基づいて動的に変わる場合は、以下のパターンを使用します：
+
+#### Zod スキーマでの条件分岐
+
+- `discriminatedUnion`を使用して型安全な条件分岐を実装
+- フォームの型を保持したまま条件付きフィールドを定義
+
+```typescript
+// Zodの判別共用体（discriminated union）を活用した条件付きバリデーション
+const formSchema = z
+  .object({
+    // 基本フィールド
+    name: z.string().max(20),
+  })
+  .and(
+    // 表示/非表示の条件分岐
+    z.discriminatedUnion("showField", [
+      z.object({
+        showField: z.literal("true"),
+        field: z.string().max(20), // showFieldがtrueの場合のみ必要
+      }),
+      z.object({
+        showField: z.literal("false"),
+      }),
+    ])
+  );
+```
+
+#### UI コンポーネントでの条件表示
+
+- `isVisible`プロパティを使用して条件付きレンダリングを制御
+- 条件分岐の状態を明示的に変数として定義し、可読性を高める
+- フォーム表示非表示切り替えをしても、入力した値を維持するため
+
+```typescript
+// 条件を明示的に変数として定義
+const showField = fields.showField.value === "true";
+
+// FieldWrapperでの条件付き表示
+<FieldWrapper
+  id={fields.additionalInfo.id}
+  labelText="追加情報"
+  errors={fields.additionalInfo.errors}
+  isVisible={showField} // 条件に基づいた表示制御
+>
+  <TextField {...getInputProps(fields.additionalInfo, { type: "text" })} />
+</FieldWrapper>;
+
+// 複数フィールドある場合
+<Box display={showField ? "flex" : "none"}>
+  <TextField {...getInputProps(fields.additionalInfo, { type: "text" })} />
+  ...
+</Box>;
+
+// ダメな例
+{
+  showField && (
+    <>
+      <TextField {...getInputProps(fields.additionalInfo, { type: "text" })} />
+      ...
+    </>
+  );
+}
+```
+
+### 複雑なフォームデータの処理 (Complex Form Data Processing)
+
+#### ファイル送信処理
+
+- `FormData`にファイルを追加する処理をカスタム関数として定義
+- フォームデータの前処理用関数を使用して、送信前のデータ加工を行う
+
+```typescript
+// FormDataにファイルを追加する処理
+const appendFormData = (formData: FormData) => {
+  formData.delete("documentField"); // 既存のデータをクリア
+  if (files.length > 0) {
+    appendFilesToFormData({
+      formData,
+      files: files,
+      fieldName: "documentField",
+    });
+  }
+  return formData;
+};
+
+// useZodFormでの使用例
+const { form, fields } = useZodForm({
+  schema: formSchema,
+  defaultValue,
+  onSubmit,
+  formDataPreprocess: appendFormData, // 送信前のデータ加工
+});
+```
+
+### ネストされた条件分岐 (Nested Conditional Logic)
+
+複数の条件が相互に依存するフォームでは、以下のアプローチを使用します：
+
+- 条件の依存関係を明確にする階層構造を持つ Zod スキーマ
+- UI での複数の条件チェックとそれに基づいた表示制御
+
+```typescript
+// ネストされた条件分岐を持つZodスキーマ
+const formSchema = z
+  .object({
+    // 基本フィールド
+  })
+  .and(
+    z.discriminatedUnion("primaryCondition", [
+      // 主条件の分岐
+      z
+        .object({
+          primaryCondition: z.literal("optionA"),
+        })
+        .and(
+          // 副条件の分岐
+          z.discriminatedUnion("secondaryCondition", [
+            // 副条件の選択肢
+          ])
+        ),
+      z.object({
+        primaryCondition: z.literal("optionB"),
+        // optionBの場合の追加フィールド
+      }),
+    ])
+  );
+```
+
+### フォーム状態の変換 (Form State Transformation)
+
+- Zod の`transform`メソッドを使用してフォーム送信時のデータ型を変換
+- 文字列から適切な型（boolean、数値など）への変換を自動化
+
+```typescript
+// 文字列をbooleanに変換する例
+const formSchema = z
+  .object({
+    showField: z.enum(["true", "false"]),
+    // その他のフィールド
+  })
+  .transform((data) => ({
+    ...data,
+    showField: data.showField === "true", // 文字列からbooleanへの変換
+  }));
+```
+
+これらのパターンを使用することで、複雑なビジネスロジックを持つフォームでも型安全性を保ちながら実装できます。

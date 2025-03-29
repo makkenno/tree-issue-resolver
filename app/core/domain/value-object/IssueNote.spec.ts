@@ -10,8 +10,8 @@ describe("IssueNote", () => {
     expect(() => new IssueNote("a".repeat(2001))).toThrow();
   });
 
-  test("2000文字入れて生成できること", () => {
-    const str = "a".repeat(2000);
+  test("3000文字入れて生成できること", () => {
+    const str = "a".repeat(3000);
     expect(new IssueNote(str).value).toBe(str);
   });
 
