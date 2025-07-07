@@ -6,12 +6,12 @@ describe("IssueNote", () => {
     expect(new IssueNote("").value).toBe("");
   });
 
-  test("2001文字以上を入れて生成しようとするとエラーになること", () => {
-    expect(() => new IssueNote("a".repeat(2001))).toThrow();
+  test("30001文字以上を入れて生成しようとするとエラーになること", () => {
+    expect(() => new IssueNote("a".repeat(30001))).toThrow();
   });
 
-  test("3000文字入れて生成できること", () => {
-    const str = "a".repeat(3000);
+  test("30000文字入れて生成できること", () => {
+    const str = "a".repeat(30000);
     expect(new IssueNote(str).value).toBe(str);
   });
 
