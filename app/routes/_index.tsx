@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => {
 
 export default function HomeComponent() {
   return (
-    <Container>
+    <Container size="100%" p={16}>
       <CreateIssueFormPage />
     </Container>
   );

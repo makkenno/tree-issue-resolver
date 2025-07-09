@@ -10,7 +10,7 @@ import { IsResolvedCheckbox } from "./_components/IsResolvedCheckbox";
 import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
 import { FC } from "react";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
-import { Box } from "@mantine/core";
+import { Box, Group } from "@mantine/core";
 
 const title = z
   .string()
@@ -81,70 +81,150 @@ export const IssueForm: FC<IssueFormProps> = ({
           />
         )}
       />
-      <Stack gap="lg">
-        <form.Field
-          name="title"
-          children={(field) => <TitleTextInput field={field} />}
-        />
-        <form.Field
-          name="isResolved"
-          children={(field) => <IsResolvedCheckbox field={field} />}
-        />
-        <form.Field
-          name="note"
-          children={(field) => <NoteTextarea field={field} />}
-        />
-        <form.Field name="children" mode="array">
-          {(field) => {
-            return (
-              <Fieldset legend="関連する子課題" bg="initial">
-                <Stack>
-                  {field.state.value.map((_, i) => (
-                    <Box key={i}>
-                      <form.Field name={`children[${i}].id`}>
-                        {(subField) => (
-                          <TextInput
-                            id={subField.name}
-                            name={subField.name}
-                            value={subField.state.value}
-                            type="hidden"
-                          />
-                        )}
-                      </form.Field>
-                      <form.Field name={`children[${i}].title`}>
-                        {(subField) => (
-                          <ChildIssueTextInput
-                            field={subField}
-                            onClickRemoveIcon={() => field.removeValue(i)}
-                          />
-                        )}
-                      </form.Field>
-                    </Box>
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const id = crypto.randomUUID();
-                      field.pushValue({ id, title: "" });
-                    }}
-                    type="button"
-                  >
-                    追加
-                  </Button>
-                </Stack>
-              </Fieldset>
-            );
+      <Group align="flex-start" gap="xl" visibleFrom="md">
+        <Box style={{ flex: 1 }}>
+          <Stack gap="lg">
+            <form.Field
+              name="title"
+              children={(field) => <TitleTextInput field={field} />}
+            />
+            <form.Field
+              name="isResolved"
+              children={(field) => <IsResolvedCheckbox field={field} />}
+            />
+            <form.Field
+              name="note"
+              children={(field) => <NoteTextarea field={field} />}
+            />
+          </Stack>
+        </Box>
+        <Box 
+          style={{ 
+            width: '400px',
+            position: 'sticky',
+            top: '20px'
           }}
-        </form.Field>
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit}>
-              {isSubmitting ? "..." : "登録"}
-            </Button>
-          )}
-        />
-      </Stack>
+        >
+          <Stack gap="lg">
+            <form.Field name="children" mode="array">
+              {(field) => {
+                return (
+                  <Fieldset legend="関連する子課題" bg="initial">
+                    <Stack>
+                      {field.state.value.map((_, i) => (
+                        <Box key={i}>
+                          <form.Field name={`children[${i}].id`}>
+                            {(subField) => (
+                              <TextInput
+                                id={subField.name}
+                                name={subField.name}
+                                value={subField.state.value}
+                                type="hidden"
+                              />
+                            )}
+                          </form.Field>
+                          <form.Field name={`children[${i}].title`}>
+                            {(subField) => (
+                              <ChildIssueTextInput
+                                field={subField}
+                                onClickRemoveIcon={() => field.removeValue(i)}
+                              />
+                            )}
+                          </form.Field>
+                        </Box>
+                      ))}
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const id = crypto.randomUUID();
+                          field.pushValue({ id, title: "" });
+                        }}
+                        type="button"
+                      >
+                        追加
+                      </Button>
+                    </Stack>
+                  </Fieldset>
+                );
+              }}
+            </form.Field>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
+                  {isSubmitting ? "..." : "登録"}
+                </Button>
+              )}
+            />
+          </Stack>
+        </Box>
+      </Group>
+      <Box hiddenFrom="md">
+        <Stack gap="lg">
+          <form.Field
+            name="title"
+            children={(field) => <TitleTextInput field={field} />}
+          />
+          <form.Field
+            name="isResolved"
+            children={(field) => <IsResolvedCheckbox field={field} />}
+          />
+          <form.Field
+            name="note"
+            children={(field) => <NoteTextarea field={field} />}
+          />
+          <form.Field name="children" mode="array">
+            {(field) => {
+              return (
+                <Fieldset legend="関連する子課題" bg="initial">
+                  <Stack>
+                    {field.state.value.map((_, i) => (
+                      <Box key={i}>
+                        <form.Field name={`children[${i}].id`}>
+                          {(subField) => (
+                            <TextInput
+                              id={subField.name}
+                              name={subField.name}
+                              value={subField.state.value}
+                              type="hidden"
+                            />
+                          )}
+                        </form.Field>
+                        <form.Field name={`children[${i}].title`}>
+                          {(subField) => (
+                            <ChildIssueTextInput
+                              field={subField}
+                              onClickRemoveIcon={() => field.removeValue(i)}
+                            />
+                          )}
+                        </form.Field>
+                      </Box>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const id = crypto.randomUUID();
+                        field.pushValue({ id, title: "" });
+                      }}
+                      type="button"
+                    >
+                      追加
+                    </Button>
+                  </Stack>
+                </Fieldset>
+              );
+            }}
+          </form.Field>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button type="submit" disabled={!canSubmit}>
+                {isSubmitting ? "..." : "登録"}
+              </Button>
+            )}
+          />
+        </Stack>
+      </Box>
     </form>
   );
 };

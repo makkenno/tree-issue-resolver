@@ -16,7 +16,7 @@ export default function RouteComponent() {
   }, [nodeId]);
 
   return (
-    <Container>
+    <Container size="100%" p={16}>
       <Suspense fallback={<LoadingOverlay />}>
         <EditIssueFormPageContainer />
       </Suspense>
