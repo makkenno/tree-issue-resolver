@@ -87,12 +87,12 @@ export const IssueForm: FC<IssueFormProps> = ({
           children={(field) => <TitleTextInput field={field} />}
         />
         <form.Field
-          name="note"
-          children={(field) => <NoteTextarea field={field} />}
-        />
-        <form.Field
           name="isResolved"
           children={(field) => <IsResolvedCheckbox field={field} />}
+        />
+        <form.Field
+          name="note"
+          children={(field) => <NoteTextarea field={field} />}
         />
         <form.Field name="children" mode="array">
           {(field) => {
