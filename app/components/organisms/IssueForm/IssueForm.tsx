@@ -10,7 +10,7 @@ import { IsResolvedCheckbox } from "./_components/IsResolvedCheckbox";
 import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
 import { FC } from "react";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
-import { Box, Group } from "@mantine/core";
+import { Box, Grid } from "@mantine/core";
 
 const title = z
   .string()
@@ -81,8 +81,8 @@ export const IssueForm: FC<IssueFormProps> = ({
           />
         )}
       />
-      <Group align="flex-start" gap="xl" visibleFrom="md">
-        <Box style={{ flex: 1 }}>
+      <Grid align="flex-start" visibleFrom="md">
+        <Grid.Col span={8}>
           <Stack gap="lg">
             <form.Field
               name="title"
@@ -97,12 +97,13 @@ export const IssueForm: FC<IssueFormProps> = ({
               children={(field) => <NoteTextarea field={field} />}
             />
           </Stack>
-        </Box>
-        <Box 
-          style={{ 
-            width: '400px',
-            position: 'sticky',
-            top: '20px'
+        </Grid.Col>
+        <Grid.Col
+          span={4}
+          style={{
+            width: "400px",
+            position: "sticky",
+            top: "20px",
           }}
         >
           <Stack gap="lg">
@@ -157,8 +158,8 @@ export const IssueForm: FC<IssueFormProps> = ({
               )}
             />
           </Stack>
-        </Box>
-      </Group>
+        </Grid.Col>
+      </Grid>
       <Box hiddenFrom="md">
         <Stack gap="lg">
           <form.Field
