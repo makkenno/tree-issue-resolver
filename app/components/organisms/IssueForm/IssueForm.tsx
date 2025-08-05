@@ -5,19 +5,25 @@ import { useForm } from "@tanstack/react-form";
 import { Fieldset } from "../../atoms/Fieldset/Fieldset";
 import { FC, useState } from "react";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
-import {
-  ActionIcon,
-  Box,
-  Checkbox,
-  Flex,
-  Grid,
-  Paper,
-  Text,
-} from "@mantine/core";
-import { TrashIcon } from "~/components/atoms/Icon/Trash/Trash";
+import { Box, Checkbox, Grid, Paper, Text } from "@mantine/core";
 import { Textarea } from "../../molecules/Textarea/Textarea";
 import { IconEye, IconEdit } from "@tabler/icons-react";
 import { MarkdownRenderer } from "../../molecules/MarkdownRenderer/MarkdownRenderer";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableChildIssueItem } from "./SortableChildIssueItem";
 
 const title = z
   .string()
@@ -54,6 +60,13 @@ export const IssueForm: FC<IssueFormProps> = ({
 }) => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const togglePreview = () => {
     setIsPreviewMode(!isPreviewMode);
   };
@@ -85,7 +98,7 @@ export const IssueForm: FC<IssueFormProps> = ({
         {(field) => (
           <input
             name={field.name}
-            value={field.state.value || ''}
+            value={field.state.value || ""}
             onChange={(e) => field.handleChange(e.target.value)}
             type="hidden"
           />
@@ -98,21 +111,19 @@ export const IssueForm: FC<IssueFormProps> = ({
               {(field) => (
                 <TextInput
                   name={field.name}
-                  value={field.state.value || ''}
+                  value={field.state.value || ""}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   label="課題"
                   error={
                     field.state.meta.isTouched && !field.state.meta.isValid ? (
-                      <em>{field.state.meta.errors.join(', ')}</em>
+                      <em>{field.state.meta.errors.join(", ")}</em>
                     ) : null
                   }
                 />
               )}
             </form.Field>
-            <form.Field
-              name="isResolved"
-            >
+            <form.Field name="isResolved">
               {(field) => (
                 <Checkbox
                   name={field.name}
@@ -166,12 +177,13 @@ export const IssueForm: FC<IssueFormProps> = ({
                   ) : (
                     <Textarea
                       name={field.name}
-                      value={field.state.value || ''}
+                      value={field.state.value || ""}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       error={
-                        field.state.meta.isTouched && !field.state.meta.isValid ? (
-                          <em>{field.state.meta.errors.join(', ')}</em>
+                        field.state.meta.isTouched &&
+                        !field.state.meta.isValid ? (
+                          <em>{field.state.meta.errors.join(", ")}</em>
                         ) : null
                       }
                       autosize
@@ -195,51 +207,68 @@ export const IssueForm: FC<IssueFormProps> = ({
               <form.Field name="children" mode="array">
                 {(field) => (
                   <Stack>
-                    {field.state.value?.map((_, i) => (
-                      <Box key={i}>
-                        <form.Field name={`children[${i}].id`}>
-                          {(idField) => (
-                            <input
-                              name={idField.name}
-                              value={idField.state.value || ''}
-                              onChange={(e) => idField.handleChange(e.target.value)}
-                              type="hidden"
-                            />
-                          )}
-                        </form.Field>
-                        <Flex align="flex-start" gap="sm" flex={1}>
-                          <form.Field name={`children[${i}].title`}>
-                            {(titleField) => (
-                              <TextInput
-                                name={titleField.name}
-                                value={titleField.state.value || ''}
-                                onChange={(e) => titleField.handleChange(e.target.value)}
-                                onBlur={titleField.handleBlur}
-                                error={
-                                  titleField.state.meta.isTouched && !titleField.state.meta.isValid ? (
-                                    <em>{titleField.state.meta.errors.join(', ')}</em>
-                                  ) : null
-                                }
-                                flex={1}
-                              />
-                            )}
-                          </form.Field>
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            mt={4}
-                            onClick={() => field.removeValue(i)}
-                          >
-                            <TrashIcon />
-                          </ActionIcon>
-                        </Flex>
-                      </Box>
-                    ))}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(event) => {
+                        const { active, over } = event;
+
+                        if (active.id !== over?.id) {
+                          const oldIndex =
+                            field.state.value?.findIndex(
+                              (item: any) => item.id === active.id
+                            ) ?? -1;
+                          const newIndex =
+                            field.state.value?.findIndex(
+                              (item: any) => item.id === over?.id
+                            ) ?? -1;
+
+                          if (oldIndex !== -1 && newIndex !== -1) {
+                            const newItems = arrayMove(
+                              field.state.value || [],
+                              oldIndex,
+                              newIndex
+                            );
+                            field.handleChange(newItems);
+                          }
+                        }
+                      }}
+                    >
+                      <SortableContext
+                        items={
+                          field.state.value?.map((item: any) => item.id) || []
+                        }
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <Stack>
+                          {field.state.value?.map((item: any, i: number) => (
+                            <form.Field
+                              key={item.id}
+                              name={`children[${i}].id`}
+                            >
+                              {(idField) => (
+                                <form.Field name={`children[${i}].title`}>
+                                  {(titleField) => (
+                                    <SortableChildIssueItem
+                                      id={item.id}
+                                      key={item.id}
+                                      titleField={titleField}
+                                      idField={idField}
+                                      onRemove={() => field.removeValue(i)}
+                                    />
+                                  )}
+                                </form.Field>
+                              )}
+                            </form.Field>
+                          ))}
+                        </Stack>
+                      </SortableContext>
+                    </DndContext>
                     <Button
                       variant="outline"
                       onClick={() => {
                         const id = crypto.randomUUID();
-                        field.pushValue({ id, title: '' });
+                        field.pushValue({ id, title: "" });
                       }}
                       type="button"
                     >
@@ -267,13 +296,13 @@ export const IssueForm: FC<IssueFormProps> = ({
             {(field) => (
               <TextInput
                 name={field.name}
-                value={field.state.value || ''}
+                value={field.state.value || ""}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 label="課題"
                 error={
                   field.state.meta.isTouched && !field.state.meta.isValid ? (
-                    <em>{field.state.meta.errors.join(', ')}</em>
+                    <em>{field.state.meta.errors.join(", ")}</em>
                   ) : null
                 }
               />
@@ -333,12 +362,13 @@ export const IssueForm: FC<IssueFormProps> = ({
                 ) : (
                   <Textarea
                     name={field.name}
-                    value={field.state.value || ''}
+                    value={field.state.value || ""}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     error={
-                      field.state.meta.isTouched && !field.state.meta.isValid ? (
-                        <em>{field.state.meta.errors.join(', ')}</em>
+                      field.state.meta.isTouched &&
+                      !field.state.meta.isValid ? (
+                        <em>{field.state.meta.errors.join(", ")}</em>
                       ) : null
                     }
                     autosize
@@ -351,51 +381,65 @@ export const IssueForm: FC<IssueFormProps> = ({
             <form.Field name="children" mode="array">
               {(field) => (
                 <Stack>
-                  {field.state.value?.map((_, i) => (
-                    <Box key={i}>
-                      <form.Field name={`children[${i}].id`}>
-                        {(idField) => (
-                          <input
-                            name={idField.name}
-                            value={idField.state.value || ''}
-                            onChange={(e) => idField.handleChange(e.target.value)}
-                            type="hidden"
-                          />
-                        )}
-                      </form.Field>
-                      <Flex align="flex-start" gap="sm" flex={1}>
-                        <form.Field name={`children[${i}].title`}>
-                          {(titleField) => (
-                            <TextInput
-                              name={titleField.name}
-                              value={titleField.state.value || ''}
-                              onChange={(e) => titleField.handleChange(e.target.value)}
-                              onBlur={titleField.handleBlur}
-                              error={
-                                titleField.state.meta.isTouched && !titleField.state.meta.isValid ? (
-                                  <em>{titleField.state.meta.errors.join(', ')}</em>
-                                ) : null
-                              }
-                              flex={1}
-                            />
-                          )}
-                        </form.Field>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          mt={4}
-                          onClick={() => field.removeValue(i)}
-                        >
-                          <TrashIcon />
-                        </ActionIcon>
-                      </Flex>
-                    </Box>
-                  ))}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event) => {
+                      const { active, over } = event;
+
+                      if (active.id !== over?.id) {
+                        const oldIndex =
+                          field.state.value?.findIndex(
+                            (item: any) => item.id === active.id
+                          ) ?? -1;
+                        const newIndex =
+                          field.state.value?.findIndex(
+                            (item: any) => item.id === over?.id
+                          ) ?? -1;
+
+                        if (oldIndex !== -1 && newIndex !== -1) {
+                          const newItems = arrayMove(
+                            field.state.value || [],
+                            oldIndex,
+                            newIndex
+                          );
+                          field.handleChange(newItems);
+                        }
+                      }
+                    }}
+                  >
+                    <SortableContext
+                      items={
+                        field.state.value?.map((item: any) => item.id) || []
+                      }
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <Stack>
+                        {field.state.value?.map((item: any, i: number) => (
+                          <form.Field key={item.id} name={`children[${i}].id`}>
+                            {(idField) => (
+                              <form.Field name={`children[${i}].title`}>
+                                {(titleField) => (
+                                  <SortableChildIssueItem
+                                    key={item.id}
+                                    id={item.id}
+                                    titleField={titleField}
+                                    idField={idField}
+                                    onRemove={() => field.removeValue(i)}
+                                  />
+                                )}
+                              </form.Field>
+                            )}
+                          </form.Field>
+                        ))}
+                      </Stack>
+                    </SortableContext>
+                  </DndContext>
                   <Button
                     variant="outline"
                     onClick={() => {
                       const id = crypto.randomUUID();
-                      field.pushValue({ id, title: '' });
+                      field.pushValue({ id, title: "" });
                     }}
                     type="button"
                   >
