@@ -2,15 +2,23 @@ import { Button } from "../../atoms/Button/Button";
 import { Stack } from "../../atoms/Stack/Stack";
 import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { Fieldset } from "../../atoms/Fieldset/Fieldset";
-import { TitleTextInput } from "./_components/TitleTextInput";
-import { NoteTextarea } from "./_components/NoteTextarea";
-import { IsResolvedCheckbox } from "./_components/IsResolvedCheckbox";
-import { ChildIssueTextInput } from "./_components/ChildIssueTextInput";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
-import { Box, Grid } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Checkbox,
+  Flex,
+  Grid,
+  Paper,
+  Text,
+} from "@mantine/core";
+import { TrashIcon } from "~/components/atoms/Icon/Trash/Trash";
+import { Textarea } from "../../molecules/Textarea/Textarea";
+import { IconEye, IconEdit } from "@tabler/icons-react";
+import { MarkdownRenderer } from "../../molecules/MarkdownRenderer/MarkdownRenderer";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 
 const title = z
   .string()
@@ -45,6 +53,12 @@ export const IssueForm: FC<IssueFormProps> = ({
   children,
   onSubmit,
 }) => {
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+
+  const togglePreview = () => {
+    setIsPreviewMode(!isPreviewMode);
+  };
+
   const form = useForm({
     defaultValues: {
       id,
@@ -86,15 +100,93 @@ export const IssueForm: FC<IssueFormProps> = ({
           <Stack gap="lg">
             <form.Field
               name="title"
-              children={(field) => <TitleTextInput field={field} />}
+              children={(field) => (
+                <TextInput
+                  id={field.name}
+                  name={field.name}
+                  label={"課題"}
+                  error={
+                    field.state.meta.errors.length ? (
+                      <em>{field.state.meta.errors.join(",")}</em>
+                    ) : null
+                  }
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              )}
             />
             <form.Field
               name="isResolved"
-              children={(field) => <IsResolvedCheckbox field={field} />}
+              children={(field) => (
+                <Checkbox
+                  id={field.name}
+                  name={field.name}
+                  label="解決した"
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.checked)}
+                  checked={field.state.value}
+                />
+              )}
             />
             <form.Field
               name="note"
-              children={(field) => <NoteTextarea field={field} />}
+              children={(field) => (
+                <Box>
+                  <Box
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <Text size="sm" fw={500}>
+                      メモ
+                    </Text>
+                    <Button
+                      variant="subtle"
+                      size="compact-sm"
+                      onClick={togglePreview}
+                      leftSection={
+                        isPreviewMode ? (
+                          <IconEdit size={16} />
+                        ) : (
+                          <IconEye size={16} />
+                        )
+                      }
+                    >
+                      {isPreviewMode ? "編集" : "プレビュー"}
+                    </Button>
+                  </Box>
+
+                  {isPreviewMode ? (
+                    <Paper withBorder p="sm" style={{ minHeight: "100px" }}>
+                      {field.state.value ? (
+                        <MarkdownRenderer content={field.state.value} />
+                      ) : (
+                        <Text c="dimmed" fs="italic">
+                          プレビューするコンテンツがありません
+                        </Text>
+                      )}
+                    </Paper>
+                  ) : (
+                    <Textarea
+                      id={field.name}
+                      name={field.name}
+                      error={
+                        field.state.meta.errors.length ? (
+                          <em>{field.state.meta.errors.join(",")}</em>
+                        ) : null
+                      }
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      autosize
+                    />
+                  )}
+                </Box>
+              )}
             />
           </Stack>
         </Grid.Col>
@@ -126,10 +218,31 @@ export const IssueForm: FC<IssueFormProps> = ({
                           </form.Field>
                           <form.Field name={`children[${i}].title`}>
                             {(subField) => (
-                              <ChildIssueTextInput
-                                field={subField}
-                                onClickRemoveIcon={() => field.removeValue(i)}
-                              />
+                              <Flex align="flex-start" gap="sm" flex={1}>
+                                <TextInput
+                                  value={subField.state.value}
+                                  onChange={(e) =>
+                                    subField.handleChange(e.target.value)
+                                  }
+                                  onBlur={subField.handleBlur}
+                                  error={
+                                    subField.state.meta.errors.length ? (
+                                      <em>
+                                        {subField.state.meta.errors.join(",")}
+                                      </em>
+                                    ) : null
+                                  }
+                                  flex={1}
+                                />
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="red"
+                                  mt={4}
+                                  onClick={() => field.removeValue(i)}
+                                >
+                                  <TrashIcon />
+                                </ActionIcon>
+                              </Flex>
                             )}
                           </form.Field>
                         </Box>
@@ -164,15 +277,93 @@ export const IssueForm: FC<IssueFormProps> = ({
         <Stack gap="lg">
           <form.Field
             name="title"
-            children={(field) => <TitleTextInput field={field} />}
+            children={(field) => (
+              <TextInput
+                id={field.name}
+                name={field.name}
+                label={"課題"}
+                error={
+                  field.state.meta.errors.length ? (
+                    <em>{field.state.meta.errors.join(",")}</em>
+                  ) : null
+                }
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+              />
+            )}
           />
           <form.Field
             name="isResolved"
-            children={(field) => <IsResolvedCheckbox field={field} />}
+            children={(field) => (
+              <Checkbox
+                id={field.name}
+                name={field.name}
+                label="解決した"
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.checked)}
+                checked={field.state.value}
+              />
+            )}
           />
           <form.Field
             name="note"
-            children={(field) => <NoteTextarea field={field} />}
+            children={(field) => (
+              <Box>
+                <Box
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <Text size="sm" fw={500}>
+                    メモ
+                  </Text>
+                  <Button
+                    variant="subtle"
+                    size="compact-sm"
+                    onClick={togglePreview}
+                    leftSection={
+                      isPreviewMode ? (
+                        <IconEdit size={16} />
+                      ) : (
+                        <IconEye size={16} />
+                      )
+                    }
+                  >
+                    {isPreviewMode ? "編集" : "プレビュー"}
+                  </Button>
+                </Box>
+
+                {isPreviewMode ? (
+                  <Paper withBorder p="sm" style={{ minHeight: "100px" }}>
+                    {field.state.value ? (
+                      <MarkdownRenderer content={field.state.value} />
+                    ) : (
+                      <Text c="dimmed" fs="italic">
+                        プレビューするコンテンツがありません
+                      </Text>
+                    )}
+                  </Paper>
+                ) : (
+                  <Textarea
+                    id={field.name}
+                    name={field.name}
+                    error={
+                      field.state.meta.errors.length ? (
+                        <em>{field.state.meta.errors.join(",")}</em>
+                      ) : null
+                    }
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    autosize
+                  />
+                )}
+              </Box>
+            )}
           />
           <form.Field name="children" mode="array">
             {(field) => {
@@ -193,10 +384,31 @@ export const IssueForm: FC<IssueFormProps> = ({
                         </form.Field>
                         <form.Field name={`children[${i}].title`}>
                           {(subField) => (
-                            <ChildIssueTextInput
-                              field={subField}
-                              onClickRemoveIcon={() => field.removeValue(i)}
-                            />
+                            <Flex align="flex-start" gap="sm" flex={1}>
+                              <TextInput
+                                value={subField.state.value}
+                                onChange={(e) =>
+                                  subField.handleChange(e.target.value)
+                                }
+                                onBlur={subField.handleBlur}
+                                error={
+                                  subField.state.meta.errors.length ? (
+                                    <em>
+                                      {subField.state.meta.errors.join(",")}
+                                    </em>
+                                  ) : null
+                                }
+                                flex={1}
+                              />
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                mt={4}
+                                onClick={() => field.removeValue(i)}
+                              >
+                                <TrashIcon />
+                              </ActionIcon>
+                            </Flex>
                           )}
                         </form.Field>
                       </Box>
