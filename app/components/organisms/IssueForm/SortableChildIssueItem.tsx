@@ -58,12 +58,18 @@ export function SortableChildIssueItem({
           error={
             titleField.state.meta.isTouched &&
             !titleField.state.meta.isValid ? (
-              <em>{titleField.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
+              <em>
+                {titleField.state.meta.errors
+                  .map((err: any) =>
+                    typeof err === "string" ? err : err?.message || String(err)
+                  )
+                  .join(", ")}
+              </em>
             ) : null
           }
           flex={1}
         />
-        <ActionIcon variant="subtle" color="red" mt={4} onClick={onRemove}>
+        <ActionIcon variant="subtle" color="red" onClick={onRemove}>
           <TrashIcon />
         </ActionIcon>
       </Flex>
