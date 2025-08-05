@@ -117,7 +117,7 @@ export const IssueForm: FC<IssueFormProps> = ({
                   label="課題"
                   error={
                     field.state.meta.isTouched && !field.state.meta.isValid ? (
-                      <em>{field.state.meta.errors.join(", ")}</em>
+                      <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                     ) : null
                   }
                 />
@@ -183,7 +183,7 @@ export const IssueForm: FC<IssueFormProps> = ({
                       error={
                         field.state.meta.isTouched &&
                         !field.state.meta.isValid ? (
-                          <em>{field.state.meta.errors.join(", ")}</em>
+                          <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                         ) : null
                       }
                       autosize
@@ -302,7 +302,7 @@ export const IssueForm: FC<IssueFormProps> = ({
                 label="課題"
                 error={
                   field.state.meta.isTouched && !field.state.meta.isValid ? (
-                    <em>{field.state.meta.errors.join(", ")}</em>
+                    <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                   ) : null
                 }
               />
@@ -368,7 +368,7 @@ export const IssueForm: FC<IssueFormProps> = ({
                     error={
                       field.state.meta.isTouched &&
                       !field.state.meta.isValid ? (
-                        <em>{field.state.meta.errors.join(", ")}</em>
+                        <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                       ) : null
                     }
                     autosize

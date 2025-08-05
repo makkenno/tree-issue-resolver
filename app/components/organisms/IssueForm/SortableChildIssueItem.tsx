@@ -58,7 +58,7 @@ export function SortableChildIssueItem({
           error={
             titleField.state.meta.isTouched &&
             !titleField.state.meta.isValid ? (
-              <em>{titleField.state.meta.errors.join(", ")}</em>
+              <em>{titleField.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
             ) : null
           }
           flex={1}
