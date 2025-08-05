@@ -18,7 +18,6 @@ import { TrashIcon } from "~/components/atoms/Icon/Trash/Trash";
 import { Textarea } from "../../molecules/Textarea/Textarea";
 import { IconEye, IconEdit } from "@tabler/icons-react";
 import { MarkdownRenderer } from "../../molecules/MarkdownRenderer/MarkdownRenderer";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 
 const title = z
   .string()
@@ -70,7 +69,6 @@ export const IssueForm: FC<IssueFormProps> = ({
     onSubmit: async ({ value }) => {
       await onSubmit(value);
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: issueSchema,
     },
@@ -81,57 +79,52 @@ export const IssueForm: FC<IssueFormProps> = ({
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
-        form.state.isSubmitting = false;
       }}
     >
-      <form.Field
-        name="id"
-        children={(field) => (
-          <TextInput
-            id={field.name}
+      <form.Field name="id">
+        {(field) => (
+          <input
             name={field.name}
-            value={field.state.value}
+            value={field.state.value || ''}
+            onChange={(e) => field.handleChange(e.target.value)}
             type="hidden"
           />
         )}
-      />
+      </form.Field>
       <Grid align="flex-start" visibleFrom="md">
         <Grid.Col span={8}>
           <Stack gap="lg">
-            <form.Field
-              name="title"
-              children={(field) => (
+            <form.Field name="title">
+              {(field) => (
                 <TextInput
-                  id={field.name}
                   name={field.name}
-                  label={"課題"}
+                  value={field.state.value || ''}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  label="課題"
                   error={
-                    field.state.meta.errors.length ? (
-                      <em>{field.state.meta.errors.join(",")}</em>
+                    field.state.meta.isTouched && !field.state.meta.isValid ? (
+                      <em>{field.state.meta.errors.join(', ')}</em>
                     ) : null
                   }
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
                 />
               )}
-            />
+            </form.Field>
             <form.Field
               name="isResolved"
-              children={(field) => (
+            >
+              {(field) => (
                 <Checkbox
-                  id={field.name}
                   name={field.name}
                   label="解決した"
-                  onBlur={field.handleBlur}
+                  checked={field.state.value || false}
                   onChange={(e) => field.handleChange(e.target.checked)}
-                  checked={field.state.value}
+                  onBlur={field.handleBlur}
                 />
               )}
-            />
-            <form.Field
-              name="note"
-              children={(field) => (
+            </form.Field>
+            <form.Field name="note">
+              {(field) => (
                 <Box>
                   <Box
                     style={{
@@ -172,22 +165,21 @@ export const IssueForm: FC<IssueFormProps> = ({
                     </Paper>
                   ) : (
                     <Textarea
-                      id={field.name}
                       name={field.name}
+                      value={field.state.value || ''}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
                       error={
-                        field.state.meta.errors.length ? (
-                          <em>{field.state.meta.errors.join(",")}</em>
+                        field.state.meta.isTouched && !field.state.meta.isValid ? (
+                          <em>{field.state.meta.errors.join(', ')}</em>
                         ) : null
                       }
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
                       autosize
                     />
                   )}
                 </Box>
               )}
-            />
+            </form.Field>
           </Stack>
         </Grid.Col>
         <Grid.Col
@@ -199,116 +191,107 @@ export const IssueForm: FC<IssueFormProps> = ({
           }}
         >
           <Stack gap="lg">
-            <form.Field name="children" mode="array">
-              {(field) => {
-                return (
-                  <Fieldset legend="関連する子課題" bg="initial">
-                    <Stack>
-                      {field.state.value.map((_, i) => (
-                        <Box key={i}>
-                          <form.Field name={`children[${i}].id`}>
-                            {(subField) => (
+            <Fieldset legend="関連する子課題" bg="initial">
+              <form.Field name="children" mode="array">
+                {(field) => (
+                  <Stack>
+                    {field.state.value?.map((_, i) => (
+                      <Box key={i}>
+                        <form.Field name={`children[${i}].id`}>
+                          {(idField) => (
+                            <input
+                              name={idField.name}
+                              value={idField.state.value || ''}
+                              onChange={(e) => idField.handleChange(e.target.value)}
+                              type="hidden"
+                            />
+                          )}
+                        </form.Field>
+                        <Flex align="flex-start" gap="sm" flex={1}>
+                          <form.Field name={`children[${i}].title`}>
+                            {(titleField) => (
                               <TextInput
-                                id={subField.name}
-                                name={subField.name}
-                                value={subField.state.value}
-                                type="hidden"
+                                name={titleField.name}
+                                value={titleField.state.value || ''}
+                                onChange={(e) => titleField.handleChange(e.target.value)}
+                                onBlur={titleField.handleBlur}
+                                error={
+                                  titleField.state.meta.isTouched && !titleField.state.meta.isValid ? (
+                                    <em>{titleField.state.meta.errors.join(', ')}</em>
+                                  ) : null
+                                }
+                                flex={1}
                               />
                             )}
                           </form.Field>
-                          <form.Field name={`children[${i}].title`}>
-                            {(subField) => (
-                              <Flex align="flex-start" gap="sm" flex={1}>
-                                <TextInput
-                                  value={subField.state.value}
-                                  onChange={(e) =>
-                                    subField.handleChange(e.target.value)
-                                  }
-                                  onBlur={subField.handleBlur}
-                                  error={
-                                    subField.state.meta.errors.length ? (
-                                      <em>
-                                        {subField.state.meta.errors.join(",")}
-                                      </em>
-                                    ) : null
-                                  }
-                                  flex={1}
-                                />
-                                <ActionIcon
-                                  variant="subtle"
-                                  color="red"
-                                  mt={4}
-                                  onClick={() => field.removeValue(i)}
-                                >
-                                  <TrashIcon />
-                                </ActionIcon>
-                              </Flex>
-                            )}
-                          </form.Field>
-                        </Box>
-                      ))}
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          const id = crypto.randomUUID();
-                          field.pushValue({ id, title: "" });
-                        }}
-                        type="button"
-                      >
-                        追加
-                      </Button>
-                    </Stack>
-                  </Fieldset>
-                );
-              }}
-            </form.Field>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            mt={4}
+                            onClick={() => field.removeValue(i)}
+                          >
+                            <TrashIcon />
+                          </ActionIcon>
+                        </Flex>
+                      </Box>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const id = crypto.randomUUID();
+                        field.pushValue({ id, title: '' });
+                      }}
+                      type="button"
+                    >
+                      追加
+                    </Button>
+                  </Stack>
+                )}
+              </form.Field>
+            </Fieldset>
             <form.Subscribe
               selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit}>
+            >
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit || isSubmitting}>
                   {isSubmitting ? "..." : "登録"}
                 </Button>
               )}
-            />
+            </form.Subscribe>
           </Stack>
         </Grid.Col>
       </Grid>
       <Box hiddenFrom="md">
         <Stack gap="lg">
-          <form.Field
-            name="title"
-            children={(field) => (
+          <form.Field name="title">
+            {(field) => (
               <TextInput
-                id={field.name}
                 name={field.name}
-                label={"課題"}
+                value={field.state.value || ''}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                label="課題"
                 error={
-                  field.state.meta.errors.length ? (
-                    <em>{field.state.meta.errors.join(",")}</em>
+                  field.state.meta.isTouched && !field.state.meta.isValid ? (
+                    <em>{field.state.meta.errors.join(', ')}</em>
                   ) : null
                 }
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
               />
             )}
-          />
-          <form.Field
-            name="isResolved"
-            children={(field) => (
+          </form.Field>
+          <form.Field name="isResolved">
+            {(field) => (
               <Checkbox
-                id={field.name}
                 name={field.name}
                 label="解決した"
-                onBlur={field.handleBlur}
+                checked={field.state.value || false}
                 onChange={(e) => field.handleChange(e.target.checked)}
-                checked={field.state.value}
+                onBlur={field.handleBlur}
               />
             )}
-          />
-          <form.Field
-            name="note"
-            children={(field) => (
+          </form.Field>
+          <form.Field name="note">
+            {(field) => (
               <Box>
                 <Box
                   style={{
@@ -349,93 +332,88 @@ export const IssueForm: FC<IssueFormProps> = ({
                   </Paper>
                 ) : (
                   <Textarea
-                    id={field.name}
                     name={field.name}
+                    value={field.state.value || ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
                     error={
-                      field.state.meta.errors.length ? (
-                        <em>{field.state.meta.errors.join(",")}</em>
+                      field.state.meta.isTouched && !field.state.meta.isValid ? (
+                        <em>{field.state.meta.errors.join(', ')}</em>
                       ) : null
                     }
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
                     autosize
                   />
                 )}
               </Box>
             )}
-          />
-          <form.Field name="children" mode="array">
-            {(field) => {
-              return (
-                <Fieldset legend="関連する子課題" bg="initial">
-                  <Stack>
-                    {field.state.value.map((_, i) => (
-                      <Box key={i}>
-                        <form.Field name={`children[${i}].id`}>
-                          {(subField) => (
+          </form.Field>
+          <Fieldset legend="関連する子課題" bg="initial">
+            <form.Field name="children" mode="array">
+              {(field) => (
+                <Stack>
+                  {field.state.value?.map((_, i) => (
+                    <Box key={i}>
+                      <form.Field name={`children[${i}].id`}>
+                        {(idField) => (
+                          <input
+                            name={idField.name}
+                            value={idField.state.value || ''}
+                            onChange={(e) => idField.handleChange(e.target.value)}
+                            type="hidden"
+                          />
+                        )}
+                      </form.Field>
+                      <Flex align="flex-start" gap="sm" flex={1}>
+                        <form.Field name={`children[${i}].title`}>
+                          {(titleField) => (
                             <TextInput
-                              id={subField.name}
-                              name={subField.name}
-                              value={subField.state.value}
-                              type="hidden"
+                              name={titleField.name}
+                              value={titleField.state.value || ''}
+                              onChange={(e) => titleField.handleChange(e.target.value)}
+                              onBlur={titleField.handleBlur}
+                              error={
+                                titleField.state.meta.isTouched && !titleField.state.meta.isValid ? (
+                                  <em>{titleField.state.meta.errors.join(', ')}</em>
+                                ) : null
+                              }
+                              flex={1}
                             />
                           )}
                         </form.Field>
-                        <form.Field name={`children[${i}].title`}>
-                          {(subField) => (
-                            <Flex align="flex-start" gap="sm" flex={1}>
-                              <TextInput
-                                value={subField.state.value}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.value)
-                                }
-                                onBlur={subField.handleBlur}
-                                error={
-                                  subField.state.meta.errors.length ? (
-                                    <em>
-                                      {subField.state.meta.errors.join(",")}
-                                    </em>
-                                  ) : null
-                                }
-                                flex={1}
-                              />
-                              <ActionIcon
-                                variant="subtle"
-                                color="red"
-                                mt={4}
-                                onClick={() => field.removeValue(i)}
-                              >
-                                <TrashIcon />
-                              </ActionIcon>
-                            </Flex>
-                          )}
-                        </form.Field>
-                      </Box>
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const id = crypto.randomUUID();
-                        field.pushValue({ id, title: "" });
-                      }}
-                      type="button"
-                    >
-                      追加
-                    </Button>
-                  </Stack>
-                </Fieldset>
-              );
-            }}
-          </form.Field>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          mt={4}
+                          onClick={() => field.removeValue(i)}
+                        >
+                          <TrashIcon />
+                        </ActionIcon>
+                      </Flex>
+                    </Box>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const id = crypto.randomUUID();
+                      field.pushValue({ id, title: '' });
+                    }}
+                    type="button"
+                  >
+                    追加
+                  </Button>
+                </Stack>
+              )}
+            </form.Field>
+          </Fieldset>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={!canSubmit}>
+          >
+            {([canSubmit, isSubmitting]) => (
+              <Button type="submit" disabled={!canSubmit || isSubmitting}>
                 {isSubmitting ? "..." : "登録"}
               </Button>
             )}
-          />
+          </form.Subscribe>
         </Stack>
       </Box>
     </form>
