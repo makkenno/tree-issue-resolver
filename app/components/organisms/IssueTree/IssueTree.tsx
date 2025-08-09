@@ -44,7 +44,7 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
         nodes={nodes}
         edges={edges}
         nodeTypes={{ issueCard: IssueCardNode }}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
         fitView
         fitViewOptions={{ padding: 0.1 }}
         nodesDraggable={false}
