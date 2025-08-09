@@ -10,7 +10,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
-      "WebFetch(domain:mantine.dev)"
+      "WebFetch(domain:mantine.dev)",
+      "Bash(pnpm test:*)"
     ],
     "deny": []
   }

@@ -17,6 +17,7 @@ import { useCreateRootIssueAtom } from "~/hooks/useCreateRootIssueAtom";
 import { findNodeInTree, cloneNodeWithChildren } from "./_utils/treeUtils";
 import { IssueNodeType } from "~/lib/zodSchema/issueTreeSchema";
 import { notifications } from "@mantine/notifications";
+import { CreateRootChildInput } from "~/core/usecase/createRoot";
 
 export type IssueTree = {
   id: string;
@@ -47,6 +48,19 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   const toggleNodeCollapse = useToggleNodeCollapseAtom();
   const issueTree = useIssueTreeAtom();
   const createRootIssue = useCreateRootIssueAtom();
+
+  const convertToCreateRootChildInput = (
+    node: IssueNodeType
+  ): CreateRootChildInput => ({
+    id: node.id,
+    title: node.title,
+    note: node.note || "",
+    isResolved: node.isResolved,
+    isCollapsed: node.isCollapsed || false,
+    children: node.children
+      ? node.children.map((child) => convertToCreateRootChildInput(child))
+      : [],
+  });
 
   useEffect(() => {
     if (nodes && nodes.length > 0 && !isDragging && !hasInitialized.current) {
@@ -149,10 +163,11 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
           title: clonedSubtree.title,
           note: clonedSubtree.note || "",
           isResolved: clonedSubtree.isResolved,
-          children:
-            clonedSubtree.children?.map((child: IssueNodeType) => ({
-              title: child.title,
-            })) || [],
+          children: clonedSubtree.children
+            ? clonedSubtree.children.map((child) =>
+                convertToCreateRootChildInput(child)
+              )
+            : [],
         });
         notifications.show({
           title: "コピー完了",
