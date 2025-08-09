@@ -105,13 +105,13 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
       {(isHovered || isAddingChild) && (
         <>
           <ActionIcon
-            size="sm"
+            size="xl"
             variant="filled"
             color="blue"
             style={{
               position: "absolute",
-              top: -8,
-              right: -8,
+              top: -20,
+              right: -20,
               zIndex: 10,
             }}
             onClick={(e) => {
@@ -119,18 +119,20 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
               setIsAddingChild(true);
             }}
           >
-            <PlusIcon size={12} />
+            <PlusIcon size={24} />
           </ActionIcon>
           <ActionIcon
-            size="sm"
+            size="xl"
             variant="subtle"
             color="gray"
             style={{
               position: "absolute",
-              top: -8,
-              left: -8,
+              top: -20,
+              left: -20,
               zIndex: 10,
               cursor: "grab",
+              fontSize: "22px",
+              fontWeight: "bold",
             }}
             onMouseDown={(e) => {
               e.stopPropagation();
