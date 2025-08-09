@@ -13,7 +13,10 @@ import { useRemoveIssueAtom } from "~/hooks/useRemoveIssueAtom";
 import { useUpdateIssueNodeAtom } from "~/hooks/useUpdateIssueNodeAtom";
 import { useToggleNodeCollapseAtom } from "~/hooks/useToggleNodeCollapseAtom";
 import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
-import { findNodeInTree } from "./_utils/treeUtils";
+import { useCreateRootIssueAtom } from "~/hooks/useCreateRootIssueAtom";
+import { findNodeInTree, cloneNodeWithChildren } from "./_utils/treeUtils";
+import { IssueNodeType } from "~/lib/zodSchema/issueTreeSchema";
+import { notifications } from "@mantine/notifications";
 
 export type IssueTree = {
   id: string;
@@ -30,7 +33,8 @@ interface IssueTreeProps {
 const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   const { nodes, edges } = useIssueTree(tree);
   const reactFlowInstance = useReactFlow();
-  const { handleDragStart, handleDragEnd, draggingSubtree, isDragging } = useDragAndDrop(tree);
+  const { handleDragStart, handleDragEnd, draggingSubtree, isDragging } =
+    useDragAndDrop(tree);
   const hasInitialized = useRef(false);
   const [contextMenu, setContextMenu] = useState<{
     nodeId: string;
@@ -42,6 +46,7 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   const updateIssueNode = useUpdateIssueNodeAtom();
   const toggleNodeCollapse = useToggleNodeCollapseAtom();
   const issueTree = useIssueTreeAtom();
+  const createRootIssue = useCreateRootIssueAtom();
 
   useEffect(() => {
     if (nodes && nodes.length > 0 && !isDragging && !hasInitialized.current) {
@@ -94,10 +99,11 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
           title: currentNode.title,
           note: currentNode.note || "",
           isResolved: !currentNode.isResolved,
-          children: currentNode.children?.map((child: any) => ({
-            id: child.id,
-            title: child.title,
-          })) || [],
+          children:
+            currentNode.children?.map((child: any) => ({
+              id: child.id,
+              title: child.title,
+            })) || [],
         });
       }
     } catch (error) {
@@ -110,17 +116,17 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
     try {
       const currentNode = findNodeInTree(issueTree, contextMenu.nodeId);
       if (currentNode) {
-        
         await toggleNodeCollapse({
           id: contextMenu.nodeId,
           title: currentNode.title,
           note: currentNode.note || "",
           isResolved: currentNode.isResolved,
           isCollapsed: currentNode.isCollapsed || false,
-          children: currentNode.children?.map((child: any) => ({
-            id: child.id,
-            title: child.title,
-          })) || [],
+          children:
+            currentNode.children?.map((child: any) => ({
+              id: child.id,
+              title: child.title,
+            })) || [],
         });
       }
     } catch (error) {
@@ -132,13 +138,48 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
     setContextMenu(null);
   };
 
+  const handleCopyAsMainIssue = async () => {
+    if (!contextMenu || !issueTree) return;
+    try {
+      const currentNode = findNodeInTree(issueTree, contextMenu.nodeId);
+      if (currentNode) {
+        const clonedSubtree = cloneNodeWithChildren(currentNode);
+        await createRootIssue({
+          id: clonedSubtree.id,
+          title: clonedSubtree.title,
+          note: clonedSubtree.note || "",
+          isResolved: clonedSubtree.isResolved,
+          children:
+            clonedSubtree.children?.map((child: IssueNodeType) => ({
+              title: child.title,
+            })) || [],
+        });
+        notifications.show({
+          title: "コピー完了",
+          message: `「${currentNode.title}」を主課題として複製しました`,
+          color: "teal",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to copy as main issue:", error);
+      notifications.show({
+        title: "エラー",
+        message: "主課題としてのコピーに失敗しました",
+        color: "red",
+      });
+    }
+  };
+
   // データベースから取得した完全なツリーデータからノード情報を取得
-  const currentNodeFromDB = contextMenu && issueTree ? findNodeInTree(issueTree, contextMenu.nodeId) : null;
-  
+  const currentNodeFromDB =
+    contextMenu && issueTree
+      ? findNodeInTree(issueTree, contextMenu.nodeId)
+      : null;
+
   return (
-    <DndContext 
+    <DndContext
       collisionDetection={closestCenter}
-      onDragStart={handleDragStart} 
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <ReactFlow
@@ -166,7 +207,12 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
         onAddNode={handleAddNode}
         onDeleteNode={handleDeleteNode}
         onToggleResolved={handleToggleResolved}
-        onToggleCollapse={(currentNodeFromDB?.children || []).length > 0 ? handleToggleCollapse : undefined}
+        onToggleCollapse={
+          (currentNodeFromDB?.children || []).length > 0
+            ? handleToggleCollapse
+            : undefined
+        }
+        onCopyAsMainIssue={handleCopyAsMainIssue}
         onClose={handleCloseContextMenu}
       />
     </DndContext>

@@ -8,7 +8,9 @@
       "mcp__ide__getDiagnostics",
       "WebFetch(domain:reactflow.dev)",
       "Bash(npm run typecheck:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:mantine.dev)"
     ],
     "deny": []
   }

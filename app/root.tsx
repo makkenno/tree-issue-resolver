@@ -10,6 +10,7 @@ import type { LinksFunction } from "@remix-run/node";
 import { ColorSchemeScript, Center } from "@mantine/core";
 import { Provider } from "./provider";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "./global.css";
 import { Loader } from "./components/atoms/Loader/Loader";
 import { MenuIcon } from "./components/atoms/Icon/Menu/Menu";

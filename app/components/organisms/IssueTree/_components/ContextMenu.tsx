@@ -13,6 +13,7 @@ export interface ContextMenuProps {
   onDeleteNode: () => void;
   onToggleResolved: () => void;
   onToggleCollapse?: () => void;
+  onCopyAsMainIssue: () => void;
   onClose: () => void;
 }
 
@@ -26,6 +27,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
   onDeleteNode,
   onToggleResolved,
   onToggleCollapse,
+  onCopyAsMainIssue,
   onClose,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,7 +60,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
 
   const getAdjustedPosition = () => {
     const menuWidth = 200;
-    const menuHeight = hasChildren ? 160 : 120;
+    const menuHeight = hasChildren ? 200 : 160;
     const padding = 10;
 
     let adjustedX = position.x;
@@ -139,6 +141,15 @@ export const ContextMenu: FC<ContextMenuProps> = ({
           }}
         />
       )}
+
+      <MenuItem
+        icon={<span style={{ fontSize: "16px" }}>📋</span>}
+        label="主課題としてコピー"
+        onClick={() => {
+          onCopyAsMainIssue();
+          onClose();
+        }}
+      />
     </Box>
   );
 };
