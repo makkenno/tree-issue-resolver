@@ -1,7 +1,9 @@
 import { ReactFlow, ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { FC, useEffect } from "react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
 import { useIssueTree } from "./_hooks/useIssueTree";
+import { useDragAndDrop } from "./_hooks/useDragAndDrop";
 import { Box } from "../../atoms/Box/Box";
 import { IssueCardNode } from "./_components/IssueCardNode";
 
@@ -19,6 +21,7 @@ interface IssueTreeProps {
 const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   const { nodes, edges } = useIssueTree(tree);
   const reactFlowInstance = useReactFlow();
+  const { handleDragEnd } = useDragAndDrop(tree);
 
   useEffect(() => {
     if (nodes && nodes.length > 0) {
@@ -29,14 +32,23 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   }, [nodes, edges, reactFlowInstance]);
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={{ issueCard: IssueCardNode }}
-      defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
-      fitView
-      fitViewOptions={{ padding: 0.1 }}
-    />
+    <DndContext 
+      collisionDetection={closestCenter} 
+      onDragEnd={handleDragEnd}
+    >
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={{ issueCard: IssueCardNode }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+        fitView
+        fitViewOptions={{ padding: 0.1 }}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        panOnDrag={false}
+        panOnScroll={true}
+      />
+    </DndContext>
   );
 };
 

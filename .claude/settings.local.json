@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm run:*)",
+      "WebFetch(domain:tanstack.com)",
+      "mcp__ide__getDiagnostics",
+      "WebFetch(domain:reactflow.dev)",
+      "Bash(npm run typecheck:*)"
+    ],
+    "deny": []
+  }
+}

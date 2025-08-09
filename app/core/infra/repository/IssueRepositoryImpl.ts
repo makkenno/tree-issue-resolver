@@ -114,6 +114,30 @@ export class DexieIssueRepository implements IssueRepository {
     await db.issues.bulkDelete(targetIssues);
   }
 
+  public async reorderChildIssues(parentId: IssueId, childIds: IssueId[]): Promise<void> {
+    const allRecords = await db.issues.toArray();
+    const childRecords = allRecords.filter((r) => r.parentIssueId === parentId.value);
+    
+    // Validate that all provided childIds exist as children of the parent
+    const existingChildIds = new Set(childRecords.map(r => r.id));
+    for (const childId of childIds) {
+      if (!existingChildIds.has(childId.value)) {
+        throw new Error(`Child issue ${childId.value} not found under parent ${parentId.value}`);
+      }
+    }
+
+    // Update the order of each child issue
+    const updatedRecords = childIds.map((childId, index) => {
+      const record = childRecords.find(r => r.id === childId.value)!;
+      return {
+        ...record,
+        order: index,
+      };
+    });
+
+    await db.issues.bulkPut(updatedRecords);
+  }
+
   private createRecords(
     issue: Issue,
     rootOrder: number,

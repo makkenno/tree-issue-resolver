@@ -7,4 +7,5 @@ export interface IssueRepository {
   saveRoot(issue: Issue): Promise<void>;
   updateIssue(issue: Issue): Promise<void>;
   removeIssue(issueId: IssueId): Promise<void>;
+  reorderChildIssues(parentId: IssueId, childIds: IssueId[]): Promise<void>;
 }
