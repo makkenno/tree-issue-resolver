@@ -28,6 +28,7 @@ export class FindIssueUseCase {
       title: issue.title.value,
       note: issue.note.value,
       isResolved: issue.isResolved,
+      isCollapsed: issue.isCollapsed,
       children: issue.children.map((child) => this.createResponse(child)),
     };
   }

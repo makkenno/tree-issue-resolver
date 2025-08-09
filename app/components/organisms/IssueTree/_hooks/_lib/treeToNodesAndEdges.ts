@@ -22,7 +22,7 @@ export const treeToNodesAndeEdges: TreeToNodesAndeEdges = (
 
   return {
     nodes,
-    edges: createEdges(id, children),
+    edges: createEdges(tree),
   };
 };
 
@@ -31,17 +31,28 @@ const createTreeNodesWithPosition = (
   position: { x: number; y: number },
   options: { matches: boolean }
 ): { nodes: NodeType[]; totalHeight: number } => {
-  const { id, title, isResolved, children } = tree;
+  const { id, title, isResolved, children, isCollapsed } = tree;
   const { x, y } = position;
   const { matches } = options;
 
   const currentNode = createNodeWithPosition(
-    { id, title, isResolved },
+    { 
+      id, 
+      title, 
+      isResolved, 
+      isCollapsed: isCollapsed || false,
+      hasChildren: children.length > 0
+    },
     { x, y }
   );
 
   let childY = y;
   const nodes = [currentNode];
+
+  // 折りたたまれている場合は子ノードを非表示にする
+  if (isCollapsed) {
+    return { nodes, totalHeight: 40 };
+  }
 
   // 半角文字数を計算
   const halfWidthCount = title.replace(
@@ -73,11 +84,18 @@ const createTreeNodesWithPosition = (
   return { nodes, totalHeight };
 };
 
-const createEdges = (parentId: string, children: IssueTree[]): EdgeType[] => {
+const createEdges = (tree: IssueTree): EdgeType[] => {
+  const { id, children, isCollapsed } = tree;
+  
+  // 折りたたまれている場合は子のエッジを作成しない
+  if (isCollapsed) {
+    return [];
+  }
+
   return children
-    .map(({ id, children: grandChildren }) => [
-      createEdge(parentId, id),
-      ...createEdges(id, grandChildren),
+    .map(child => [
+      createEdge(id, child.id),
+      ...createEdges(child),
     ])
     .flat();
 };
@@ -90,6 +108,8 @@ type NodeType = {
     id: string;
     title: string;
     isResolved: boolean;
+    isCollapsed?: boolean;
+    hasChildren?: boolean;
   };
 };
 const createNodeWithPosition = (
@@ -97,10 +117,12 @@ const createNodeWithPosition = (
     id: string;
     title: string;
     isResolved: boolean;
+    isCollapsed?: boolean;
+    hasChildren?: boolean;
   },
   position: { x: number; y: number }
 ): NodeType => {
-  const { id, title, isResolved } = data;
+  const { id, title, isResolved, isCollapsed, hasChildren } = data;
   return {
     id,
     position,
@@ -109,6 +131,8 @@ const createNodeWithPosition = (
       id,
       title,
       isResolved,
+      isCollapsed,
+      hasChildren,
     },
   };
 };

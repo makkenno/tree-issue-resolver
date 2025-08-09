@@ -10,15 +10,27 @@ import { ActionIcon } from "~/components/atoms/ActionIcon/ActionIcon";
 interface IssueCardProps {
   title: string;
   isResolved: boolean;
+  isCollapsed?: boolean;
+  hasChildren?: boolean;
   onToggleResolved?: () => void;
+  onToggleCollapse?: () => void;
 }
 
 const MAX_LETTER_LENGTH = 40;
 
-export const IssueCard: FC<IssueCardProps> = ({ title, isResolved, onToggleResolved }) => {
+export const IssueCard: FC<IssueCardProps> = ({ 
+  title, 
+  isResolved, 
+  isCollapsed = false, 
+  hasChildren = false,
+  onToggleResolved,
+  onToggleCollapse
+}) => {
+  // 枠線なし、アイコンのみで表現
+
   return (
     <Tooltip
-      label={title}
+      label={`${title}${hasChildren ? (isCollapsed ? ' (折りたたまれています)' : ' (展開されています)') : ''}`}
       disabled={title.length < MAX_LETTER_LENGTH - 3}
       multiline
     >
@@ -29,7 +41,7 @@ export const IssueCard: FC<IssueCardProps> = ({ title, isResolved, onToggleResol
         padding="sm"
       >
         <Flex gap={4} align="center">
-          <Flex align="center">
+          <Flex align="center" gap={2}>
             <ActionIcon
               size="sm"
               variant="subtle"
@@ -53,6 +65,30 @@ export const IssueCard: FC<IssueCardProps> = ({ title, isResolved, onToggleResol
                 <QuestionMarkIcon color="red" />
               )}
             </ActionIcon>
+            
+            {/* 折りたたみ状態のインジケーター - クリック可能 */}
+            {hasChildren && (
+              <ActionIcon
+                size="sm"
+                variant="subtle"
+                color="gray"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onToggleCollapse?.();
+                }}
+                style={{ 
+                  cursor: onToggleCollapse ? "pointer" : "default",
+                  transition: "transform 0.1s ease",
+                  fontSize: '12px'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.9)"}
+                onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+              >
+                {isCollapsed ? '📁' : '📂'}
+              </ActionIcon>
+            )}
           </Flex>
           <Text lineClamp={1}>{title}</Text>
         </Flex>

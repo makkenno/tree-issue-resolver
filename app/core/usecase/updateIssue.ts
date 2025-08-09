@@ -9,6 +9,7 @@ interface UpdateIssueInput {
   title: string;
   note: string;
   isResolved: boolean;
+  isCollapsed?: boolean;
   children: {
     id: string;
     title: string;
@@ -36,7 +37,8 @@ export class UpdateIssueUseCase {
           existChild.note,
           existChild.isResolved,
           existChild.children,
-          existChild.createdAt
+          existChild.createdAt,
+          existChild.isCollapsed
         );
       }
       return new Issue(
@@ -45,7 +47,8 @@ export class UpdateIssueUseCase {
         new IssueNote(""),
         false,
         [],
-        new Date()
+        new Date(),
+        false
       );
     });
 
@@ -55,7 +58,8 @@ export class UpdateIssueUseCase {
       new IssueNote(input.note),
       input.isResolved,
       childrenToUpdate,
-      new Date()
+      new Date(),
+      input.isCollapsed !== undefined ? input.isCollapsed : existIssue.isCollapsed
     );
 
     await this.repository.updateIssue(updated);

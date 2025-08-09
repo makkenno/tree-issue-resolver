@@ -5,6 +5,7 @@ const baseIssueNodeSchema = z.object({
   title: z.string().min(1),
   note: z.string(),
   isResolved: z.boolean(),
+  isCollapsed: z.boolean().optional(),
 });
 
 export type IssueNodeType = z.infer<typeof baseIssueNodeSchema> & {

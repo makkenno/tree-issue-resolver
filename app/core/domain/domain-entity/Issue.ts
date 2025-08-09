@@ -10,7 +10,8 @@ export class Issue {
     public readonly note: IssueNote,
     public readonly isResolved: boolean,
     public readonly children: Issue[],
-    public readonly createdAt: Date
+    public readonly createdAt: Date,
+    public readonly isCollapsed: boolean = false
   ) {}
 
   static fromObject(obj: IssueType): Issue {
@@ -20,7 +21,8 @@ export class Issue {
       new IssueNote(obj.note),
       obj.isResolved,
       obj.children.map((child) => Issue.fromObject(child)),
-      new Date()
+      new Date(),
+      obj.isCollapsed || false
     );
   }
 }

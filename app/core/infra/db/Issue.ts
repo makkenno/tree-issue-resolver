@@ -5,6 +5,7 @@ export interface IssueRecord {
   title: string;
   note: string;
   isResolved: boolean;
+  isCollapsed?: boolean;
   parentIssueId: string | null; // ルートなら null
   order: number;
   createdAt: Date;
@@ -15,7 +16,7 @@ class IssueDexieDB extends Dexie {
 
   constructor() {
     super("IssueDatabase");
-    this.version(2).stores({
+    this.version(3).stores({
       issues: "id, parentIssueId, createdAt, order",
     });
   }

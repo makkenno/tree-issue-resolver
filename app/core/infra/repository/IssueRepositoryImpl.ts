@@ -50,6 +50,7 @@ export class DexieIssueRepository implements IssueRepository {
       title: childIssue.title.value,
       note: childIssue.note.value,
       isResolved: childIssue.isResolved,
+      isCollapsed: childIssue.isCollapsed,
       parentIssueId: issue.id.value,
       order: index,
       createdAt: childIssue.createdAt,
@@ -60,6 +61,7 @@ export class DexieIssueRepository implements IssueRepository {
       title: issue.title.value,
       note: issue.note.value,
       isResolved: issue.isResolved,
+      isCollapsed: issue.isCollapsed,
       parentIssueId: targetRecord.parentIssueId,
       order: targetRecord.order,
       createdAt: issue.createdAt,
@@ -70,6 +72,7 @@ export class DexieIssueRepository implements IssueRepository {
       title: childIssue.title.value,
       note: childIssue.note.value,
       isResolved: childIssue.isResolved,
+      isCollapsed: childIssue.isCollapsed,
       parentIssueId: issue.id.value,
       order: index,
       createdAt: childIssue.createdAt,
@@ -148,6 +151,7 @@ export class DexieIssueRepository implements IssueRepository {
       title: issue.title.value,
       note: issue.note.value,
       isResolved: issue.isResolved,
+      isCollapsed: issue.isCollapsed,
       parentIssueId: parentIssueId ? parentIssueId.value : null,
       order: rootOrder,
       createdAt: issue.createdAt,
@@ -175,7 +179,8 @@ export class DexieIssueRepository implements IssueRepository {
       new IssueNote(rootRec.note),
       rootRec.isResolved,
       childRecords.map((r) => this.buildSubtree(r, allRecords)),
-      rootRec.createdAt
+      rootRec.createdAt,
+      rootRec.isCollapsed || false
     );
   }
 }

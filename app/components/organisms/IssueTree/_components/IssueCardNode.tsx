@@ -10,11 +10,21 @@ import { TextInput } from "~/components/molecules/TextInput/TextInput";
 import { useAddChildIssueAtom } from "~/hooks/useAddChildIssueAtom";
 import { useUpdateIssueNodeAtom } from "~/hooks/useUpdateIssueNodeAtom";
 import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
+import { useToggleNodeCollapseAtom } from "~/hooks/useToggleNodeCollapseAtom";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { findNodeInTree } from "../_utils/treeUtils";
 
 export interface IssueCardNodeProps {
-  data: { id: string; title: string; isResolved: boolean; note?: string; children?: { id: string; title: string }[] };
+  data: { 
+    id: string; 
+    title: string; 
+    isResolved: boolean; 
+    isCollapsed?: boolean; 
+    hasChildren?: boolean;
+    note?: string; 
+    children?: { id: string; title: string }[] 
+  };
 }
 
 export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
@@ -25,6 +35,7 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const addChildIssue = useAddChildIssueAtom();
   const updateIssueNode = useUpdateIssueNodeAtom();
+  const toggleNodeCollapse = useToggleNodeCollapseAtom();
   const issueTree = useIssueTreeAtom();
   
   const {
@@ -92,15 +103,6 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
     setChildTitle("");
   };
 
-  const findNodeInTree = (tree: any, targetId: string): any => {
-    if (tree.id === targetId) return tree;
-    for (const child of tree.children || []) {
-      const found = findNodeInTree(child, targetId);
-      if (found) return found;
-    }
-    return null;
-  };
-
   const handleToggleResolved = async () => {
     try {
       const currentNode = issueTree ? findNodeInTree(issueTree, data.id) : null;
@@ -119,6 +121,27 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
     }
   };
 
+  const handleToggleCollapse = async () => {
+    try {
+      const currentNode = issueTree ? findNodeInTree(issueTree, data.id) : null;
+      if (currentNode) {
+        await toggleNodeCollapse({
+          id: data.id,
+          title: currentNode.title,
+          note: currentNode.note || "",
+          isResolved: currentNode.isResolved,
+          isCollapsed: currentNode.isCollapsed || false,
+          children: currentNode.children?.map((child: any) => ({
+            id: child.id,
+            title: child.title,
+          })) || [],
+        });
+      }
+    } catch (error) {
+      console.error("Failed to toggle node collapse:", error);
+    }
+  };
+
   return (
     <Box
       ref={setNodeRef}
@@ -132,7 +155,10 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
         <IssueCard 
           title={data.title} 
           isResolved={data.isResolved}
+          isCollapsed={data.isCollapsed}
+          hasChildren={data.hasChildren}
           onToggleResolved={handleToggleResolved}
+          onToggleCollapse={data.hasChildren ? handleToggleCollapse : undefined}
         />
       </Link>
       <Handle type="source" position={Position.Right} />
