@@ -1,20 +1,34 @@
-import { DragEndEvent } from "@dnd-kit/core";
+import { useState } from "react";
+import { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { useReorderChildIssuesAtom } from "~/hooks/useReorderChildIssuesAtom";
 import { IssueTree } from "../IssueTree";
 import { 
   findNodeParent, 
   findChildrenOrder, 
   reorderArray, 
-  isValidReorder 
+  isValidReorder,
+  findSubtree
 } from "../_utils/dragDropUtils";
 import { NodePosition, ReorderOperation } from "../_types/dragDrop";
 
 interface UseDragAndDropReturn {
+  handleDragStart: (event: DragStartEvent) => void;
   handleDragEnd: (event: DragEndEvent) => Promise<void>;
+  draggingSubtree: IssueTree | null;
+  isDragging: boolean;
 }
 
 export const useDragAndDrop = (tree: IssueTree): UseDragAndDropReturn => {
   const reorderChildIssues = useReorderChildIssuesAtom();
+  const [draggingSubtree, setDraggingSubtree] = useState<IssueTree | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = (event: DragStartEvent): void => {
+    const activeNodeId = event.active.id as string;
+    const subtree = findSubtree(activeNodeId, tree);
+    setDraggingSubtree(subtree);
+    setIsDragging(true);
+  };
 
   const handleDragEnd = async (event: DragEndEvent): Promise<void> => {
     const { active, over } = event;
@@ -56,7 +70,16 @@ export const useDragAndDrop = (tree: IssueTree): UseDragAndDropReturn => {
         }
       }
     }
+    
+    // Clear dragging state
+    setDraggingSubtree(null);
+    setIsDragging(false);
   };
 
-  return { handleDragEnd };
+  return { 
+    handleDragStart,
+    handleDragEnd,
+    draggingSubtree,
+    isDragging
+  };
 };

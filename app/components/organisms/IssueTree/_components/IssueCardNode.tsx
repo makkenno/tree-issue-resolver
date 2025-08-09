@@ -47,7 +47,7 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
 
   const style = {
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1,
     backgroundColor: isOver ? 'rgba(0, 123, 255, 0.1)' : undefined,
     border: isOver ? '2px dashed #007bff' : undefined,
   };

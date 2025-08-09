@@ -47,3 +47,17 @@ export const isValidReorder = (
 ): boolean => {
   return activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex;
 };
+
+/**
+ * 指定されたノードIDから子ツリー全体を取得する
+ */
+export const findSubtree = (nodeId: string, currentTree: IssueTree): IssueTree | null => {
+  if (currentTree.id === nodeId) {
+    return currentTree;
+  }
+  for (const child of currentTree.children) {
+    const found = findSubtree(nodeId, child);
+    if (found) return found;
+  }
+  return null;
+};

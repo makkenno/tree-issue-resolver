@@ -1,11 +1,12 @@
 import { ReactFlow, ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { FC, useEffect } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { FC, useEffect, useRef } from "react";
+import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
 import { useIssueTree } from "./_hooks/useIssueTree";
 import { useDragAndDrop } from "./_hooks/useDragAndDrop";
 import { Box } from "../../atoms/Box/Box";
 import { IssueCardNode } from "./_components/IssueCardNode";
+import { DraggingTreePreview } from "./_components/DraggingTreePreview";
 
 export type IssueTree = {
   id: string;
@@ -21,19 +22,22 @@ interface IssueTreeProps {
 const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
   const { nodes, edges } = useIssueTree(tree);
   const reactFlowInstance = useReactFlow();
-  const { handleDragEnd } = useDragAndDrop(tree);
+  const { handleDragStart, handleDragEnd, draggingSubtree, isDragging } = useDragAndDrop(tree);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (nodes && nodes.length > 0) {
+    if (nodes && nodes.length > 0 && !isDragging && !hasInitialized.current) {
       setTimeout(() => {
         reactFlowInstance.fitView({ padding: 0.1 });
+        hasInitialized.current = true;
       }, 100);
     }
-  }, [nodes, edges, reactFlowInstance]);
+  }, [nodes, edges, reactFlowInstance, isDragging]);
 
   return (
     <DndContext 
-      collisionDetection={closestCenter} 
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart} 
       onDragEnd={handleDragEnd}
     >
       <ReactFlow
@@ -48,6 +52,9 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
         panOnDrag={false}
         panOnScroll={true}
       />
+      <DragOverlay>
+        {draggingSubtree && <DraggingTreePreview subtree={draggingSubtree} />}
+      </DragOverlay>
     </DndContext>
   );
 };
