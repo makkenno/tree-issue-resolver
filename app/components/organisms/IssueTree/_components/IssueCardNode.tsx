@@ -8,11 +8,13 @@ import { ActionIcon } from "~/components/atoms/ActionIcon/ActionIcon";
 import { PlusIcon } from "~/components/atoms/Icon/Plus/Plus";
 import { TextInput } from "~/components/molecules/TextInput/TextInput";
 import { useAddChildIssueAtom } from "~/hooks/useAddChildIssueAtom";
+import { useUpdateIssueNodeAtom } from "~/hooks/useUpdateIssueNodeAtom";
+import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
 export interface IssueCardNodeProps {
-  data: { id: string; title: string; isResolved: boolean };
+  data: { id: string; title: string; isResolved: boolean; note?: string; children?: { id: string; title: string }[] };
 }
 
 export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
@@ -22,6 +24,8 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
   const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const addChildIssue = useAddChildIssueAtom();
+  const updateIssueNode = useUpdateIssueNodeAtom();
+  const issueTree = useIssueTreeAtom();
   
   const {
     attributes,
@@ -88,6 +92,33 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
     setChildTitle("");
   };
 
+  const findNodeInTree = (tree: any, targetId: string): any => {
+    if (tree.id === targetId) return tree;
+    for (const child of tree.children || []) {
+      const found = findNodeInTree(child, targetId);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const handleToggleResolved = async () => {
+    try {
+      const currentNode = issueTree ? findNodeInTree(issueTree, data.id) : null;
+      await updateIssueNode({
+        id: data.id,
+        title: currentNode?.title || data.title,
+        note: currentNode?.note || "",
+        isResolved: !data.isResolved,
+        children: currentNode?.children?.map((child: any) => ({
+          id: child.id,
+          title: child.title,
+        })) || [],
+      });
+    } catch (error) {
+      console.error("Failed to toggle issue resolution:", error);
+    }
+  };
+
   return (
     <Box
       ref={setNodeRef}
@@ -98,7 +129,11 @@ export const IssueCardNode: FC<IssueCardNodeProps> = ({ data }) => {
     >
       <Handle type="target" position={Position.Left} />
       <Link to={`/edit/${treeId}/${data.id}`}>
-        <IssueCard title={data.title} isResolved={data.isResolved} />
+        <IssueCard 
+          title={data.title} 
+          isResolved={data.isResolved}
+          onToggleResolved={handleToggleResolved}
+        />
       </Link>
       <Handle type="source" position={Position.Right} />
       
