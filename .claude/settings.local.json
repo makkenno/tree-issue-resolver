@@ -11,7 +11,8 @@
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
       "WebFetch(domain:mantine.dev)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
