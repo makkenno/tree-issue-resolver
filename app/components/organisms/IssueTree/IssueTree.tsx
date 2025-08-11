@@ -206,7 +206,7 @@ const IssueTreeContent: FC<IssueTreeProps> = ({ tree }) => {
         fitViewOptions={{ padding: 0.1 }}
         nodesDraggable={false}
         nodesConnectable={false}
-        panOnDrag={false}
+        panOnDrag={!isDragging}
         panOnScroll={true}
         onNodeContextMenu={handleNodeContextMenu}
       />
