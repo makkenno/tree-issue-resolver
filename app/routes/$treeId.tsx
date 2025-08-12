@@ -17,7 +17,7 @@ export default function $TreeIdComponent() {
   }, [treeId]);
 
   return (
-    <Container>
+    <Container miw="100vw">
       <Suspense fallback={<LoadingOverlay />}>
         <DisplayIssueTreePageContainer />
       </Suspense>
