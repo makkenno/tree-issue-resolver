@@ -12,6 +12,7 @@ const importIssueAtom = atom(null, async (_get, set, args: ImportIssueArgs) => {
     title: args.title,
     note: args.note,
     isResolved: args.isResolved,
+    isCollapsed: args.isCollapsed,
     children: args.children,
   });
   set(refetchIssueTitlesAtom, (prev) => prev + 1);

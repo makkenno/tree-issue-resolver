@@ -1,4 +1,4 @@
-import { Container } from "@mantine/core";
+import { Container, Text } from "@mantine/core";
 import { useState } from "react";
 import { Button } from "~/components/atoms/Button/Button";
 import { Stack } from "~/components/atoms/Stack/Stack";
@@ -6,10 +6,13 @@ import { Title } from "~/components/atoms/Title/Title";
 import { Textarea } from "~/components/molecules/Textarea/Textarea";
 import { useimportIssueAtom } from "~/hooks/useImportIssueAtom";
 import { useNavigate } from "~/hooks/useNavigate";
-import { issueTreeSchema } from "~/lib/zodSchema/issueTreeSchema";
+import {
+  parseSimpleFormat,
+  convertToIssueNode,
+} from "~/lib/parser/simpleFormatParser";
 
 export default function ImportPage() {
-  const [jsonInput, setJsonInput] = useState("");
+  const [input, setInput] = useState("");
   const navigate = useNavigate();
   const importIssue = useimportIssueAtom();
 
@@ -22,26 +25,42 @@ export default function ImportPage() {
         onSubmit={async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const issueTree = issueTreeSchema.safeParse(JSON.parse(jsonInput));
-          if (!issueTree.success) {
-            alert("JSONの形式が正しくありません");
+
+          const simpleNode = parseSimpleFormat(input);
+          if (!simpleNode) {
+            alert("テキストの形式が正しくありません");
             return;
           }
+
+          const issueTreeData = convertToIssueNode(simpleNode);
+
           try {
-            await importIssue(issueTree.data);
+            await importIssue(issueTreeData);
           } catch (e) {
             alert("インポートに失敗しました");
             return;
           }
-          navigate(`/${issueTree.data.id}`);
+          navigate(`/${issueTreeData.id}`);
         }}
       >
         <Stack>
-          <Textarea
-            value={jsonInput}
-            autosize
-            onChange={(e) => setJsonInput(e.target.value)}
-          />
+          <div>
+            <Text size="sm" fw={500} mb="xs">
+              課題ツリー
+            </Text>
+            <Text size="xs" c="dimmed" mb="xs">
+              例: # タイトル → ## 子タイトル → ### 孫タイトル
+              <br />
+              メモは行頭に &gt; を付けて記述
+            </Text>
+            <Textarea
+              value={input}
+              autosize
+              minRows={8}
+              placeholder="# メインタスク\n> これはメモです\n\n## サブタスク1\n\n### 詳細タスク"
+              onChange={(e) => setInput(e.target.value)}
+            />
+          </div>
           <Button type="submit">インポート</Button>
         </Stack>
       </form>

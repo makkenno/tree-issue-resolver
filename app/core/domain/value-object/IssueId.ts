@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export class IssueId {
   private constructor(public readonly value: string) {
-    if (!z.string().uuid().safeParse(value).success) {
+    if (!z.uuidv4().safeParse(value).success) {
       throw new Error(`invalid IssueId ${value}`);
     }
   }

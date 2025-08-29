@@ -4,6 +4,7 @@ import { Flex } from "../../../atoms/Flex/Flex";
 import { Stack } from "../../../atoms/Stack/Stack";
 import { IssueTree } from "../../../organisms/IssueTree/IssueTree";
 import { useIssueTreeAtom } from "~/hooks/useIssueRootAtom";
+import { convertToSimpleFormat } from "~/lib/parser/simpleFormatParser";
 
 export const DisplayIssueTreePageContainer = () => {
   const issueTree = useIssueTreeAtom();
@@ -14,7 +15,7 @@ export const DisplayIssueTreePageContainer = () => {
     <Stack mt="md">
       <IssueTree tree={issueTree} />
       <Flex gap="xs">
-        <CopyButton value={JSON.stringify(issueTree)}>
+        <CopyButton value={convertToSimpleFormat(issueTree)}>
           {({ copied, copy }) => (
             <Button
               size="compact-xs"
@@ -23,7 +24,7 @@ export const DisplayIssueTreePageContainer = () => {
               color={copied ? "teal" : "blue"}
               onClick={copy}
             >
-              {copied ? "コピーした" : "コピー"}
+              {copied ? "テキストをコピーした" : "テキストをコピー"}
             </Button>
           )}
         </CopyButton>
