@@ -65,9 +65,5 @@
     "remark-gfm": "^4.0.0",
     "storybook-dark-mode": "^4.0.2",
     "zod": "^4.0.14"
-  },
-  "volta": {
-    "node": "22.11.0",
-    "pnpm": "9.12.3"
   }
 }

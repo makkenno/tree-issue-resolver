@@ -51,9 +51,14 @@ interface Node {
 
 function generateMarkdown(node: Node, depth: number = 1): string {
   const headerPrefix = "#".repeat(depth);
+
+  const processedNote = node.note
+    .replace(/^(#+)/g, `${headerPrefix}$1`) // 先頭の#
+    .replace(/\n(#+)/g, `\n${headerPrefix}$1`); // 改行直後の#
+
   let markdown =
     node.note.length !== 0
-      ? `${headerPrefix} ${node.title}\n\n${node.note}\n\n`
+      ? `${headerPrefix} ${node.title}\n\n${processedNote}\n\n`
       : `${headerPrefix} ${node.title}\n\n`;
 
   for (const child of node.children) {
