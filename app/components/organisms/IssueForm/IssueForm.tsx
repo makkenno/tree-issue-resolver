@@ -4,11 +4,9 @@ import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Fieldset } from "../../atoms/Fieldset/Fieldset";
 import { FC, useState } from "react";
-import { TextInput } from "~/components/molecules/TextInput/TextInput";
-import { Box, Checkbox, Grid, Paper, Text } from "@mantine/core";
-import { Textarea } from "../../molecules/Textarea/Textarea";
-import { IconEye, IconEdit } from "@tabler/icons-react";
-import { MarkdownRenderer } from "../../molecules/MarkdownRenderer/MarkdownRenderer";
+import { Box, Checkbox, Grid } from "@mantine/core";
+import { TitleField } from "./TitleField";
+import { NoteField } from "./NoteField";
 import {
   DndContext,
   closestCenter,
@@ -109,17 +107,19 @@ export const IssueForm: FC<IssueFormProps> = ({
           <Stack gap="lg">
             <form.Field name="title">
               {(field) => (
-                <TextInput
+                <TitleField
                   name={field.name}
                   value={field.state.value || ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={field.handleChange}
                   onBlur={field.handleBlur}
-                  label="課題"
                   error={
                     field.state.meta.isTouched && !field.state.meta.isValid ? (
                       <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                     ) : null
                   }
+                  isPreviewMode={isPreviewMode}
+                  isTouched={field.state.meta.isTouched}
+                  isValid={field.state.meta.isValid}
                 />
               )}
             </form.Field>
@@ -136,60 +136,19 @@ export const IssueForm: FC<IssueFormProps> = ({
             </form.Field>
             <form.Field name="note">
               {(field) => (
-                <Box>
-                  <Box
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <Text size="sm" fw={500}>
-                      メモ
-                    </Text>
-                    <Button
-                      variant="subtle"
-                      size="compact-sm"
-                      onClick={togglePreview}
-                      leftSection={
-                        isPreviewMode ? (
-                          <IconEdit size={16} />
-                        ) : (
-                          <IconEye size={16} />
-                        )
-                      }
-                    >
-                      {isPreviewMode ? "編集" : "プレビュー"}
-                    </Button>
-                  </Box>
-
-                  {isPreviewMode ? (
-                    <Paper withBorder p="sm" style={{ minHeight: "100px" }}>
-                      {field.state.value ? (
-                        <MarkdownRenderer content={field.state.value} />
-                      ) : (
-                        <Text c="dimmed" fs="italic">
-                          プレビューするコンテンツがありません
-                        </Text>
-                      )}
-                    </Paper>
-                  ) : (
-                    <Textarea
-                      name={field.name}
-                      value={field.state.value || ""}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      error={
-                        field.state.meta.isTouched &&
-                        !field.state.meta.isValid ? (
-                          <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
-                        ) : null
-                      }
-                      autosize
-                    />
-                  )}
-                </Box>
+                <NoteField
+                  name={field.name}
+                  value={field.state.value || ""}
+                  onChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  error={
+                    field.state.meta.isTouched && !field.state.meta.isValid ? (
+                      <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
+                    ) : null
+                  }
+                  isPreviewMode={isPreviewMode}
+                  onTogglePreview={togglePreview}
+                />
               )}
             </form.Field>
           </Stack>
@@ -294,17 +253,19 @@ export const IssueForm: FC<IssueFormProps> = ({
         <Stack gap="lg">
           <form.Field name="title">
             {(field) => (
-              <TextInput
+              <TitleField
                 name={field.name}
                 value={field.state.value || ""}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={field.handleChange}
                 onBlur={field.handleBlur}
-                label="課題"
                 error={
                   field.state.meta.isTouched && !field.state.meta.isValid ? (
                     <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
                   ) : null
                 }
+                isPreviewMode={isPreviewMode}
+                isTouched={field.state.meta.isTouched}
+                isValid={field.state.meta.isValid}
               />
             )}
           </form.Field>
@@ -321,60 +282,19 @@ export const IssueForm: FC<IssueFormProps> = ({
           </form.Field>
           <form.Field name="note">
             {(field) => (
-              <Box>
-                <Box
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <Text size="sm" fw={500}>
-                    メモ
-                  </Text>
-                  <Button
-                    variant="subtle"
-                    size="compact-sm"
-                    onClick={togglePreview}
-                    leftSection={
-                      isPreviewMode ? (
-                        <IconEdit size={16} />
-                      ) : (
-                        <IconEye size={16} />
-                      )
-                    }
-                  >
-                    {isPreviewMode ? "編集" : "プレビュー"}
-                  </Button>
-                </Box>
-
-                {isPreviewMode ? (
-                  <Paper withBorder p="sm" style={{ minHeight: "100px" }}>
-                    {field.state.value ? (
-                      <MarkdownRenderer content={field.state.value} />
-                    ) : (
-                      <Text c="dimmed" fs="italic">
-                        プレビューするコンテンツがありません
-                      </Text>
-                    )}
-                  </Paper>
-                ) : (
-                  <Textarea
-                    name={field.name}
-                    value={field.state.value || ""}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                    error={
-                      field.state.meta.isTouched &&
-                      !field.state.meta.isValid ? (
-                        <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
-                      ) : null
-                    }
-                    autosize
-                  />
-                )}
-              </Box>
+              <NoteField
+                name={field.name}
+                value={field.state.value || ""}
+                onChange={field.handleChange}
+                onBlur={field.handleBlur}
+                error={
+                  field.state.meta.isTouched && !field.state.meta.isValid ? (
+                    <em>{field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || String(err)).join(", ")}</em>
+                  ) : null
+                }
+                isPreviewMode={isPreviewMode}
+                onTogglePreview={togglePreview}
+              />
             )}
           </form.Field>
           <Fieldset legend="関連する子課題" bg="initial">
